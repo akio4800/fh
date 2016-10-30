@@ -1,21 +1,14 @@
-#include <functional>
-#include <iostream>
 #include "header\tools.h"
 
 
 namespace fn {
 	typedef  std::function<double(double)> integratee_t;
-	typedef  std::function<double(integratee_t,double,double)> integrator_t;
-
-
-
-
-	//functions
+	typedef  std::function<double(integratee_t, double, double)> integrator_t;
 
 	double x_2(double x) { return x*x; };
 	double x2(double x) { return 2 * x; };
-	double sinf(double x) { return sin(x);}
-	double cosf(double x) { return cos(x);}
+	double sinf(double x) { return sin(x); }
+	double cosf(double x) { return cos(x); }
 	double x_3(double x) { return x*x*x; };
 	double poly(double x) { return 2 * (x*x*x) + 3 * (x*x) - 2 * x + 3; }
 
@@ -27,9 +20,31 @@ namespace fn {
 
 
 
-	double integrate_serial(integratee_t func_integratee, integrator_t func_integrate, double start, double end,int num) {
+	//functions
 
-		double thick = abs(start - end)/num;
+
+
+
+	std::vector<std::string> split(std::string str, char delimiter) {
+		std::vector<std::string> internal;
+		std::stringstream ss(str); // Turn the string into a stream.
+		std::string tok;
+
+		while (std::getline(ss, tok, delimiter)) {
+			internal.push_back(tok);
+		}
+
+		return internal;
+	}
+
+
+
+
+
+
+	double integrate_serial(integratee_t func_integratee, integrator_t func_integrate, double start, double end, int num) {
+
+		double thick = abs(start - end) / num;
 		double istart = start;
 		double iend = start + thick;
 
@@ -37,26 +52,64 @@ namespace fn {
 
 		for (size_t i = 0; i < num; i++)
 		{
-		sum+=func_integrate(func_integratee, istart, iend);
-		istart = iend;
-		iend = istart + thick;
+			sum += func_integrate(func_integratee, istart, iend);
+			istart = iend;
+			iend = istart + thick;
 
 		}
 
 
 
 
-	
-	return sum;
+
+		return sum;
+	}
+	int getparts(int nodes, int num, int part) {
+		int n = num / nodes;
+		int r = num % nodes;
+		return r == 0 ? n : r > part ? n + 1 : n;
 	}
 
-	double integrate_parallel() {
+	double integrate_simpson(integratee_t func, double start, double end) {
+
+		return (end - start) / 6 * (func(start) + 4 * func((start + end) / 2) + func(end));
+
+
+
+	}
+
+	double integrate_trapez(integratee_t func, double start, double end) {
+
+
+
+		return (end - start)*((func(start) + func(end)) / 2);
+
+	}
+
+
+	void integrate_parallel(int argc, char* argv[]) {
+
+		std::map<int, integratee_t> funcs;
+		std::map<int, integrator_t> funcs2;
+
+
+		funcs.insert(std::pair<int, integratee_t>(1, x2));
+		funcs.insert(std::pair<int, integratee_t>(2, x_2));
+		funcs.insert(std::pair<int, integratee_t>(3, sinf));
+		funcs.insert(std::pair<int, integratee_t>(4, cosf));
+		funcs.insert(std::pair<int, integratee_t>(5, poly));
+
+		funcs2.insert(std::pair<int, integrator_t>(1, integrate_simpson));
+		funcs2.insert(std::pair<int, integrator_t>(1, integrate_trapez));
+
+
+
+
 
 		try {
 			mpi::check(MPI_Init(&argc, &argv));
 			int rank{ -1 };
 			int size{ -1 };
-
 
 			char name[MPI_MAX_PROCESSOR_NAME];
 			mpi::check(MPI_Comm_rank(MPI_COMM_WORLD, &rank));
@@ -65,155 +118,103 @@ namespace fn {
 			mpi::check(MPI_Get_processor_name(name, &name_len));
 
 
+
 			if (size > 1) {
 				if (rank == 0) {
-					// create and send messages:
-					std::string message = "clockwise";
-					mpi::check(MPI_Send(message.c_str(), message.size() + 1, MPI_CHAR, 1, 0, MPI_COMM_WORLD));
+					int num = 0;
+					double start = 0;
+					double end = 0;
+					int parts = 0;
+					int method = 0;
 
-					message = "counter-clockwise";
-					mpi::check(MPI_Send(message.c_str(), message.size() + 1, MPI_CHAR, size - 1, 0, MPI_COMM_WORLD));
 
-					// expect two messages, so get from 2 sources. Not made in a loop because with only 2 messages it looks more understandable to call Recv twice.
+					std::cout << "func num: ";
+					std::cin >> num;
+
+					std::cout << "start: ";
+					std::cin >> start;
+
+					std::cout << "end: ";
+					std::cin >> end;
+
+					std::cout << "parts:";
+					std::cin >> parts;
+
+					std::cout << "method:";
+					std::cin >> method;
+					double thick = abs(end - start) / parts;
+
+					double pstart = start + getparts(size, parts, 0)*thick;
+
+
+
+					for (int i = 1; i < size; i++)
+					{
+						double pend = pstart + getparts(size, parts, 0)*thick;
+
+
+						std::string message = std::to_string(num) + ";"
+							+ std::to_string(pstart) + ";"
+							+ std::to_string(pend) + ";"
+							+ std::to_string(getparts(size, parts, i)) + ";"
+							+ std::to_string(method);
+						mpi::check(MPI_Send(message.c_str(), message.size() + 1, MPI_CHAR, i, 0, MPI_COMM_WORLD));
+
+						pstart = pend;
+					}
+
+					double sum = integrate_serial(funcs.at(num), funcs2.at(method), start, pstart, getparts(size, parts, 0));
 					MPI_Status status{};
 					char buffer[100]{};
 					buffer[0] = '\0';
-					mpi::check(MPI_Recv(buffer, sizeof(buffer) / sizeof(buffer[0]), MPI_CHAR, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status));
-					std::cout << "msg: " << buffer << std::endl;
-					mpi::check(MPI_Recv(buffer, sizeof(buffer) / sizeof(buffer[0]), MPI_CHAR, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status));
-					std::cout << "msg: " << buffer << std::endl;
+					for (int j = 1; j < size; j++)
+					{
+						mpi::check(MPI_Recv(buffer, sizeof(buffer) / sizeof(buffer[0]), MPI_CHAR, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status));
+						std::string b = buffer;
+						sum += std::stoi(b);
+					}
+					std::cout << "sum:" << sum <<std::endl;
 				}
 				else {
-					for (int i = 0; i < 2; i++) {
-						// two messages, one clockwise and one counter-clockwise
 
-						MPI_Status status{};
-						char buffer[100]{};
-						buffer[0] = '\0';
-						mpi::check(MPI_Recv(buffer, sizeof(buffer) / sizeof(buffer[0]), MPI_CHAR, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status));
+					MPI_Status status{};
+					char buffer[100]{};
+					buffer[0] = '\0';
+					mpi::check(MPI_Recv(buffer, sizeof(buffer) / sizeof(buffer[0]), MPI_CHAR, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status));
+					std::string rec = buffer;
+					std::vector<std::string> v = split(rec, ';');
+
+					double a = integrate_serial(funcs.at(std::stoi(v[0])), funcs2.at(std::stoi(v[4])), std::stoi(v[1]), std::stoi(v[2]), std::stoi(v[3]));
+
+					std::string message = std::to_string(a);
+
+					mpi::check(MPI_Send(message.c_str(), message.size() + 1, MPI_CHAR, 0, 0, MPI_COMM_WORLD));
 
 
-						int dest = -1;
-						if (status.MPI_SOURCE != 0) {
-							// sender other than 0
-							if (status.MPI_SOURCE < rank) {
-								// clockwise:
-								if (rank == size - 1) {
-									dest = 0;
-								}
-								else {
-									dest = rank + 1;
-								}
-								mpi::check(MPI_Send(buffer, sizeof(buffer), MPI_CHAR, dest, 0, MPI_COMM_WORLD));
-							}
-							else {
-								dest = rank - 1;
-								mpi::check(MPI_Send(buffer, sizeof(buffer), MPI_CHAR, dest, 0, MPI_COMM_WORLD));
-							}
-						}
-						else {
-							// if sender is 0
-							if (rank == 1) {
-								// clockwise:
-								if (rank == size - 1) {
-									dest = 0;
-								}
-								else {
-									dest = rank + 1;
-								}
-								mpi::check(MPI_Send(buffer, sizeof(buffer), MPI_CHAR, dest, 0, MPI_COMM_WORLD));
-							}
-							if (rank == size - 1) {
-								dest = rank - 1;
-								mpi::check(MPI_Send(buffer, sizeof(buffer), MPI_CHAR, dest, 0, MPI_COMM_WORLD));
-							}
-						}
-					}
 				}
 			}
 			else {
-				std::cout << "more than one note requiered" << std::endl;
+				std::cout << "more than one node requiered" << std::endl;
 			}
-			mpi::check(MPI_Finalize());
-
-
 
 		}
 		catch (mpi::mpi_exeception &e) {
 			std::cerr << e.what() << std::endl;
-		}
-		;
+		};
 
-
-
-
-
-
-
-
-
-
-		return 0;
+		mpi::check(MPI_Finalize());
 	}
-
-	int getparts(int nodes, int num, int part) {
-		int n = num / nodes;
-		int r = num % nodes;
-		return r == 0 ? n : r > part ? n + 1 : n;
-	}
-
-	double integrate_simpson(integratee_t func, double start, double end) {
-		
-		return (end - start) / 6 * (func(start) + 4 * func((start + end) / 2) + func(end));
-		
-
-
-	}
-
-	double integrate_trapez(integratee_t func,double start, double end) {
-		
-		
-
-		return (end - start)*((func(start) + func(end)) / 2);
-
-	}
-
-
 }
 
 
 
-int main() {
-
-
-
-	int nodes = 5;
-
-	int parts = 30;
-
-	for (int part = 0; part <= parts; part++)
-	{
-		std::cout << part << ":\t";
-
-		int sum = 0;
-
-
-		for (int node = 0; node < nodes; node++)
-		{
-			int p = fn::getparts(nodes, part, node);
-
-			sum += p;
-			std::cout << p << " ";
-		}
-
-
-		std::cout << "sum: " << sum << std::endl;
-	}
+int main(int argc, char* argv[]) {
 
 
 
 
-	std::cout << fn::integrate_serial(fn::x_2, fn::integrate_trapez, 0, 20, 112);
+
+	fn::integrate_parallel(argc, argv);
 
 
 }

@@ -3,23 +3,28 @@
 #include <mpi.h>
 #include <iostream>
 #include <stdexcept>
+#include <functional>
+#include <string>
+#include <vector>
+#include <sstream>
+#include<map>
 
 namespace mpi {
 
 
-	class mpi_execption : public std::runtime_error
+	class mpi_exeception : public std::runtime_error
 	{
 	public:
-		mpi_execption(char * text);
-		~mpi_execption();
+		mpi_exeception(char * text);
+		~mpi_exeception();
 	private:
 	};
 
-	mpi_execption::mpi_execption(char * text) :runtime_error(text) {
+	mpi_exeception::mpi_exeception(char * text) :runtime_error(text) {
 
 	}
 	
-	mpi_execption::~mpi_execption()
+	mpi_exeception::~mpi_exeception()
 	{
 	}
 	
@@ -29,7 +34,7 @@ namespace mpi {
 			char errortext[MPI_MAX_ERROR_STRING];
 			int max_len{};
 			MPI_Error_string(error,errortext,&max_len);
-				throw mpi_execption(errortext);
+				throw mpi_exeception(errortext + __LINE__);
 			}
 		}
 }

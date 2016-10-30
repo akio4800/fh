@@ -151,7 +151,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="integrate.cpp" />
-    <ClCompile Include="main\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="header\tools.h" />

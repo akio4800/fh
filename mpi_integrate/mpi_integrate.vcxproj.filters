@@ -21,9 +21,6 @@
     <ClCompile Include="integrate.cpp">
       <Filter>Quelldateien\main</Filter>
     </ClCompile>
-    <ClCompile Include="main\main.cpp">
-      <Filter>Quelldateien\main</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="header\tools.h">
