@@ -1,4 +1,0 @@
-﻿  main.cpp
-  integrate.cpp
-  Code wird generiert...
-LINK : fatal error LNK1104: Datei "msmpi.lib" kann nicht geöffnet werden.

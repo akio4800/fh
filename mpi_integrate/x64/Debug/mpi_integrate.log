@@ -1,8 +1,0 @@
-﻿  integrate.cpp
-d:\gitrepo\fh\mpi_integrate\header\tools.h(37): warning C4297: "mpi::check": Die Funktion löst eine unerwartete Ausnahme aus
-  d:\gitrepo\fh\mpi_integrate\header\tools.h(37): note: __declspec(nothrow), throw(), noexcept(true) oder noexcept wurde für die Funktion angegeben
-d:\gitrepo\fh\mpi_integrate\integrate.cpp(161): warning C4267: "Argument": Konvertierung von "size_t" nach "int", Datenverlust möglich
-d:\gitrepo\fh\mpi_integrate\integrate.cpp(191): warning C4267: "Argument": Konvertierung von "size_t" nach "int", Datenverlust möglich
-d:\gitrepo\fh\mpi_integrate\header\tools.h(39): warning C4715: "mpi::check": Nicht alle Steuerelementpfade geben einen Wert zurück.
-  mpi_integrate.vcxproj -> D:\gitrepo\fh\mpi_integrate\x64\Debug\mpi_integrate.exe
-  mpi_integrate.vcxproj -> D:\gitrepo\fh\mpi_integrate\x64\Debug\mpi_integrate.pdb (Full PDB)
