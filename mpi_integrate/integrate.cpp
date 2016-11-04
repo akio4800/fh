@@ -4,38 +4,13 @@
 namespace fn {
 	typedef  std::function<double(double)> integratee_t;
 	typedef  std::function<double(integratee_t, double, double)> integrator_t;
-
-	double x_2(double x) { return x*x; };
 	double x2(double x) { return 2 * x; };
+	double x_2(double x) { return x*x; };
 	double sinf(double x) { return sin(x); }
 	double cosf(double x) { return cos(x); }
 	double x_3(double x) { return x*x*x; };
 	double poly(double x) { return 2 * (x*x*x) + 3 * (x*x) - 2 * x + 3; }
 
-
-
-
-
-
-
-
-
-	//functions
-
-
-
-
-	std::vector<std::string> split(std::string str, char delimiter) {
-		std::vector<std::string> internal;
-		std::stringstream ss(str); // Turn the string into a stream.
-		std::string tok;
-
-		while (std::getline(ss, tok, delimiter)) {
-			internal.push_back(tok);
-		}
-
-		return internal;
-	}
 
 
 
@@ -100,7 +75,7 @@ namespace fn {
 		funcs.insert(std::pair<int, integratee_t>(5, poly));
 
 		funcs2.insert(std::pair<int, integrator_t>(1, integrate_simpson));
-		funcs2.insert(std::pair<int, integrator_t>(1, integrate_trapez));
+		funcs2.insert(std::pair<int, integrator_t>(2, integrate_trapez));
 
 
 
@@ -146,49 +121,47 @@ namespace fn {
 
 					double pstart = start + getparts(size, parts, 0)*thick;
 
-
+					double sum = integrate_serial(funcs.at(num), funcs2.at(method), start, pstart, getparts(size, parts, 0));
 
 					for (int i = 1; i < size; i++)
 					{
 						double pend = pstart + getparts(size, parts, 0)*thick;
 
-
-						std::string message = std::to_string(num) + ";"
-							+ std::to_string(pstart) + ";"
-							+ std::to_string(pend) + ";"
-							+ std::to_string(getparts(size, parts, i)) + ";"
-							+ std::to_string(method);
-						mpi::check(MPI_Send(message.c_str(), message.size() + 1, MPI_CHAR, i, 0, MPI_COMM_WORLD));
+						double params[5] = { num,pstart,pend,getparts(size, parts, i),method };
+						mpi::check(MPI_Send(params, 5, MPI_DOUBLE, i, 0, MPI_COMM_WORLD));
 
 						pstart = pend;
 					}
 
-					double sum = integrate_serial(funcs.at(num), funcs2.at(method), start, pstart, getparts(size, parts, 0));
+
+					std::cout << sum << " ";
 					MPI_Status status{};
-					char buffer[100]{};
-					buffer[0] = '\0';
+					double buffer;
+
 					for (int j = 1; j < size; j++)
 					{
-						mpi::check(MPI_Recv(buffer, sizeof(buffer) / sizeof(buffer[0]), MPI_CHAR, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status));
-						std::string b = buffer;
-						sum += std::stoi(b);
+						mpi::check(MPI_Recv(&buffer, 1, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status));
+						std::cout << buffer << " ";
+						sum += buffer;
 					}
-					std::cout << "sum:" << sum <<std::endl;
+					std::cout << "sum:" << sum << std::endl;
 				}
 				else {
 
 					MPI_Status status{};
-					char buffer[100]{};
-					buffer[0] = '\0';
-					mpi::check(MPI_Recv(buffer, sizeof(buffer) / sizeof(buffer[0]), MPI_CHAR, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status));
-					std::string rec = buffer;
-					std::vector<std::string> v = split(rec, ';');
+					double buffer[5]{};
+					mpi::check(MPI_Recv(buffer, 5, MPI_DOUBLE, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status));
+					for (size_t i = 0; i < 5; i++)
+					{
+						std::cout << buffer[i] << " ";
+					}
+					std::cout << std::endl;
 
-					double a = integrate_serial(funcs.at(std::stoi(v[0])), funcs2.at(std::stoi(v[4])), std::stoi(v[1]), std::stoi(v[2]), std::stoi(v[3]));
+					double a = integrate_serial(funcs.at(buffer[0]), funcs2.at(buffer[4]), buffer[1], buffer[2], buffer[3]);
 
-					std::string message = std::to_string(a);
 
-					mpi::check(MPI_Send(message.c_str(), message.size() + 1, MPI_CHAR, 0, 0, MPI_COMM_WORLD));
+
+					mpi::check(MPI_Send(&a, 1, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD));
 
 
 				}
@@ -213,7 +186,7 @@ int main(int argc, char* argv[]) {
 
 
 
-
+	//	std::cout<<fn::integrate_serial(fn::x2, fn::integrate_trapez, -10, 10, 10);
 	fn::integrate_parallel(argc, argv);
 
 
