@@ -54,13 +54,13 @@ int must_send(int s, int rank, int root, int size) {
 
 void main() {
 
-	size_t size = 100;
-	int root = 10;
+	size_t size = 10;
+	int root = 0;
 
 
 
 
-	for (int s = 0; s < ceil_log2(size); ++s) {
+	for (int s = ceil_log2(size)-1; s >= 0 ; --s) {
 
 
 

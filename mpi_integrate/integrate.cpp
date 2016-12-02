@@ -2,6 +2,7 @@
 
 
 namespace fn {
+
 	typedef  std::function<double(double)> integratee_t;
 	typedef  std::function<double(integratee_t, double, double)> integrator_t;
 	double x2(double x) { return 2 * x; };
@@ -14,7 +15,101 @@ namespace fn {
 
 
 
+	int power2(int s) {
 
+		return 1 << s;
+	}
+
+
+
+	int ceil_log2(int s) {
+		int i = 0;
+		--s;
+		while (s > 0) {
+			s >>= 1; ++i;
+		}
+		return i;
+	}
+
+
+
+
+
+	int must_receive(int s, int rank, int root, int size) {
+
+
+		if (rank >= power2(s) && rank < power2(s + 1)) {
+
+			return (rank - power2(s) + root) % size;
+		}
+
+		return -1;
+
+	}
+
+
+
+	int must_send(int s, int rank, int root, int size) {
+
+		if (rank < power2(s) && rank + power2(s) < size) {
+
+			return (rank + power2(s) + root) % size;
+		}
+
+
+		return -1;
+
+	}
+
+	void send(double data[], int rank, int buddy) {
+
+		mpi::check(MPI_Send(data, 5, MPI_DOUBLE, buddy, 0, MPI_COMM_WORLD));
+		
+
+	}
+
+	void receive(double data[], int rank, int buddy) {
+		MPI_Status status{};
+		double buffer[5]{};
+		mpi::check(MPI_Recv(&buffer, 1, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status));
+
+		data = buffer;
+	}
+
+
+	void broadcast(int root, int rank, int size, double data[]) {
+
+		for (int s = 0; s < ceil_log2(size); ++s) {
+			int buddy = -1;
+
+			if ((buddy = must_receive(s, rank, root, size)) > -1) {
+				receive(data, rank, buddy);
+
+			}
+			else if ((buddy = must_send(s, rank, root, size)) > -1) {
+				send(data, rank, buddy);
+			}
+		}
+	}
+
+
+
+	void reduce(int root, int rank, int size, double data[]) {
+
+		for (int s = ceil_log2(size)-1; s >=0 ; --s) {
+			int buddy = -1;
+
+			if ((buddy = must_receive(s, rank, root, size)) > -1) {
+				receive(data, rank, buddy);
+
+			}
+			else if ((buddy = must_send(s, rank, root, size)) > -1) {
+				send(data, rank, buddy);
+			}
+		}
+
+
+	}
 
 
 	double integrate_serial(integratee_t func_integratee, integrator_t func_integrate, double start, double end, int num) {
@@ -93,14 +188,18 @@ namespace fn {
 			mpi::check(MPI_Get_processor_name(name, &name_len));
 
 
-
 			if (size > 1) {
-				if (rank == 0) {
+				
+				
 					int num = 0;
 					double start = 0;
 					double end = 0;
 					int parts = 0;
 					int method = 0;
+					double params[5] = { num,start,end,parts,method };
+					double thick = abs(end - start) / parts;
+				if (rank == 0) {
+					
 
 
 					std::cout << "func num: ";
@@ -121,48 +220,47 @@ namespace fn {
 
 					double pstart = start + getparts(size, parts, 0)*thick;
 
-					double sum = integrate_serial(funcs.at(num), funcs2.at(method), start, pstart, getparts(size, parts, 0));
+						broadcast(0, rank, size, params);
 
-					for (int i = 1; i < size; i++)
-					{
-						double pend = pstart + getparts(size, parts, 0)*thick;
+						double a = integrate_serial(funcs.at(num), funcs2.at(method), start, pstart, getparts(size, parts, 0));
 
-						double params[5] = { num,pstart,pend,getparts(size, parts, i),method };
-						mpi::check(MPI_Send(params, 5, MPI_DOUBLE, i, 0, MPI_COMM_WORLD));
+						reduce(0, rank, size, &a);
 
-						pstart = pend;
+						std::cout << "sum: " << a << std::endl;
+
 					}
-
-
-					std::cout << sum << " ";
-					MPI_Status status{};
-					double buffer;
-
-					for (int j = 1; j < size; j++)
-					{
-						mpi::check(MPI_Recv(&buffer, 1, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status));
-						std::cout << buffer << " ";
-						sum += buffer;
-					}
-					std::cout << "sum:" << sum << std::endl;
-				}
+				
 				else {
 
-					MPI_Status status{};
-					double buffer[5]{};
-					mpi::check(MPI_Recv(buffer, 5, MPI_DOUBLE, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status));
-					for (size_t i = 0; i < 5; i++)
+					broadcast(0, rank, size, params);
+
+					double s = 0 ;
+					double e = 0;
+
+					for (int i = 0; i < rank; i++)
 					{
-						std::cout << buffer[i] << " ";
+						s += getparts(size, parts, i);
 					}
-					std::cout << std::endl;
-
-					double a = integrate_serial(funcs.at(buffer[0]), funcs2.at(buffer[4]), buffer[1], buffer[2], buffer[3]);
-
+					
+					s *= thick;
 
 
-					mpi::check(MPI_Send(&a, 1, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD));
+					for (int i = 0; i <= rank; i++)
+					{
+						e += getparts(size, parts, i);
+					}
 
+					e *= thick;
+				
+
+
+
+					double a = integrate_serial(funcs.at(num), funcs2.at(method), s, e, getparts(size, parts, 0));
+
+					reduce(0, rank, size, &a);
+
+
+				
 
 				}
 			}
