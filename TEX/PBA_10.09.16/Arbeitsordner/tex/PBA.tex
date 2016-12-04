@@ -1,0 +1,49 @@
+
+\documentclass[bachelor,german]{hgbthesis}
+\RequirePackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{stackengine}
+\usepackage{pdfpages}
+\usepackage{graphicx} 
+\usepackage{float}
+\usepackage{rotating}
+\bibliography{literatur}
+
+\setlength{\parindent}{0pt}
+\graphicspath{{images/}}
+\begin{document}
+\title{Outlook/Exchange Adapter für CGM G3 Clinical Information System MRP}
+\author{Krainer Philipp}
+\studiengang{Medizin- und Bioinformatik}
+\studienort{Hagenberg}
+\abgabedatum{2016}{12}{01}	% {YYYY}{MM}{DD}
+
+\nummer{1310458007-B}   % XX...X = Stud-ID, z.B. 0310238045-A  
+												%%% (A = 1. Bachelorarbeit)
+\gegenstand{IGS}                      
+\semester{Sommersemester 2016} 
+\betreuer{Oliver Krauss MSc}
+
+
+
+\frontmatter
+\maketitle
+\include{deu}
+\include{eng}
+\tableofcontents
+
+
+
+
+
+\mainmatter
+\include{einleitung}
+\include{soa}
+\include {design}
+\include{implementierung}
+\include{evaluierung}
+\include{Zusammenfassung}
+
+\MakeBibliography
+
+\end{document}

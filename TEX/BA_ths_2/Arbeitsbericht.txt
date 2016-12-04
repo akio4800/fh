@@ -1,0 +1,40 @@
+Arbeitsbericht
+Woche 1
+Am am Anfang habe meinen Firmen-Laptop bekommen und musste erst alles einrichten, da fast keine Software installiert war, welche ich zum Arbeiten brauchte. Als erstes ist mir aufgefallen, dass die Beschaffung der Hardware nicht einfach abgelaufen.
+Der neächste Tag begann damit, dass ich angefangen habe über die Java Exchange Outlook API zu recherchieren und auch begonnen mit dem Testweisen zu programmieren. Diese API nennt sich JAVA EWS und ist relativ einfach zu verwenden.
+Auch am darauffolgenden Tag beschäftigte ich mit programmieren und habe mein erstes Testprogramm fertig gestellt.
+Am letzten Tag der Woche habe ich begonnen meinen Outlooktestserver auf Basis von einen Windows Server 2012 R2 aufzusetzen und dies erwies sich als relativ schwierig. Dieser wird gebraucht, da ich mein Programm mit Hilfe eines Outlookservers testen muss.
+
+
+Woche 2
+Als erstes habe ich die Installation und Einrichtung des Outlook-Mailservers abgeschlossen und startete dann mit dem Programmieren. Als erstes habe ich ein generelles Konzept entworfen, um die Funktionsweise zu skizzieren.
+Als nächstes stand ein generischer XML und JSON Reader am Programm, welchen ich jeweils so implementierte, dass die Struktur der Eingabedatei nicht bekannt sein musste, welches sich anfänglich relativ schwer erwies. Nach einiger Zeit hatte ich das geschafft und begann mit der Implementation von den zugehörigen generischen Writern, diese habe ich implementiert und auch getestet. Weiters habe ich Funktionen implementiert, welche die generischen XML bzw. JSON Objekte in zugehörige DTOs umwandeln.
+
+Woche 3
+In dieser Woche arbeitete ich an den XML und JSON Reader und Writern sowie an der Implementation des Kontaktservices und das dazugehörige Datenobjekt. Dann folgte die Integration meines Projektes in das gesamte Projekt via git. Das Tool Git war mir zwar bekannt, aber habe es aktiv nicht verwendet. Daher ist es mir schwer gefallen damit zu Arbeiten, aber nach einiger Zeit habe ich es verstanden und kam relativ gut zurecht.  Auch habe ich mein Projekt so vorbereitet, dass dieses mit dem ganzen  Projekt funktioniert, dazu habe ich das Tool Maven und Intellij verwendet. Weiters habe ich den Kontaktservice fertiggestellt und getestet. 
+
+Woche 4
+Nun wurde eine Verbindung zwischen meinen System und dem MRP-System geschaffen mit Hilfe eines Connector-Service. Dieser bekommt die Daten von der Applikation und wandelt diese in Modulspezifische Datenobjekte um. Bei dem Connector-Service handelt es sich um eine API welche dazu dient die Zusammenarbeit zweier großen Teile zu ermöglichen. Weiters wurde auch ein Kalenderservice implementiert mit diesen ist es möglich Termine zu erstellen und auch diese wieder auszulesen. Am Ende der Woche habe ich begonnen an einen speziellen Filtersystem zu arbeiten, welches ermöglicht, verschieden Datentypen zu vergleichen und dabei nicht auf direkte Membervariablen bechränkt ist.
+
+
+Woche 5
+In diesem Zeitraum habe ich an den Filtersystem weiterentwickelt, um dieses noch flexibler zu gestalten. Nun kann ich verschiedene Filter nacheinander oder getrennt auf das selbe Objekt anwenden. Es war relativ schwer das in ausreichender Performance zu implementieren, dass geschah mit Hilfe von Vermeidung von geschachtelten Schleifen und Bedingungen. Als weiteres folgte nun die Integration des Filtersystems in die Erstellung von Terminen und Events.
+
+Woche 6
+Dann habe ich weitere Vergleichsmethoden hinzugefügt welche auf größer/kleiner vergleichen und damit wird es möglich Elemente zu sortieren und diese dann auch auszulesen. Die Schwierigkeit bestand darin dass auf die Typensicherheit geachtet werden muss, damit dass Objekte verglichen werden können. Weiters habe ich eine Funktion implementiert welche es erlaubt Termine nacheinander zu erstellen, auch wenn der ursprüngliche Termin früher wahr.
+
+Woche 7
+In dieser Woche kümmerte ich mich zuerst um die Validierung und Speicherung von XML-Dateien welche zu einem Schema validiert werden können und somit kann überprüft werden ob die XML-Datei gültig ist. Auch habe ich die Möglichkeit zum laden und speichern von den Einstellungen bzw. Verbindungen. Außerdem habe ich eine allgemeine Methode implementiert die es ermöglicht beliebe XML-Dateien zu validieren.
+
+Woche 8
+Ich habe begonnen mein Projekt in zwei Teile aufzuteilen, das eine wird "`core"' und das andere "`web"'. Das erste beinhaltet alle backend Funktionen sowie die gesamte Businesslogik. Das andere wird dann zur Webanwendung welche auf eine Tomcat-Server laufen wird. Grundsätzlich kann von einer zwei Schichten Architektur gesprochen werden da die Datenbankschicht im Endeffekt nur eine Mock-Implementierung ist und d.h. nicht mit einer Datenbank verbunden. 
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,55 @@
+\chapter{Arbeitsbericht}
+\section{Woche 1} Am Anfang habe ich meinen Firmen-Laptop bekommen und musste erst alles einrichten, da fast keine Software installiert war, welche ich zum Arbeiten brauchte. Als erstes ist mir aufgefallen, dass die Beschaffung der Hardware nicht einfach abgelaufen ist.
+Der nächste Tag begann damit, dass ich angefangen habe über die Java Exchange Outlook API zu recherchieren und auch anfing zu programmieren. Diese API nennt sich JAVA EWS und ist relativ einfach zu verwenden.
+Auch am darauffolgenden Tag beschäftigte ich mich mit programmieren und habe mein erstes Testprogramm fertig gestellt.
+Am letzten Tag der Woche habe ich begonnen meinen Outlooktestserver auf Basis von einen Windows Server 2012 R2 aufzusetzen und dies erwies sich als relativ schwierig. Dieser wird gebraucht, da ich mein Programm mit Hilfe eines Outlookservers testen muss.
+
+
+\section{Woche 2}
+Als erstes habe ich die Installation und Einrichtung des Outlook-Mailservers abgeschlossen und startete dann mit dem Programmieren. Zu erst habe ich ein generelles Konzept entworfen, um die Funktionsweise zu skizzieren.
+Als nächstes stand ein generischer XML und JSON Reader am Programm, welchen ich jeweils so implementierte, dass die Struktur der Eingabedatei nicht bekannt sein musste, welches sich anfänglich relativ schwer erwies. Nach einiger Zeit hatte ich das geschafft und begann mit der Implementation von den zugehörigen generischen Writern, diese habe ich implementiert und auch getestet. Weiters habe ich Funktionen implementiert, welche die generischen XML bzw. JSON Objekte in zugehörige DTOs umwandeln.
+
+\section{Woche 3}
+In dieser Woche arbeitete ich an den XML und JSON Reader und den Writern sowie an der Implementation des Kontaktservices und dem dazugehörigen Datenobjekt. Dann folgte die Integration meines Projektes in das gesamte Projekt via git. Das Tool Git war mir zwar bekannt, aber ich habe es aktiv nicht verwendet. Daher ist es mir schwer gefallen damit zu arbeiten. Doch nach einiger Zeit habe ich es verstanden und kam relativ gut zurecht.  Auch habe ich mein Projekt so vorbereitet, dass dieses mit dem Hauptprojekt funktioniert. Dazu habe ich das Tool Maven und Intellij verwendet. Weiters habe ich den Kontaktservice fertiggestellt und getestet. 
+
+\section{Woche 4}
+Nun wurde eine Verbindung zwischen meinen System und dem MRP-System geschaffen mit Hilfe eines Connector-Service. Dieser bekommt die Daten von der Applikation und wandelt diese in Modulspezifische Datenobjekte um. Bei dem Connector-Service handelt es sich um eine API welche dazu dient die Zusammenarbeit von zwei großen Teilen zu ermöglichen. Weiters wurde auch ein Kalenderservice implementiert. Mit diesen ist es möglich Termine zu erstellen und auch diese wieder auszulesen. Am Ende der Woche habe ich begonnen an einem speziellen Filtersystem zu arbeiten, welches den Vergleich verschiedener Datentypen ermöglicht und dabei nicht auf direkte Membervariablen beschränkt ist.
+
+
+\section{Woche 5}
+In diesem Zeitraum habe ich das Filtersystem weiterentwickelt, um dieses noch flexibler zu gestalten. Nun kann ich verschiedene Filter nacheinander oder getrennt auf dasselbe Objekt anwenden. Es war relativ schwer es in ausreichender Performance zu implementieren. Das geschah durch vermeiden von geschachtelten Schleifen und Bedingungen. Als weiteres folgte nun die Integration des Filtersystems in die Erstellung von Terminen und Events.
+
+\section{Woche 6}
+ Dann habe ich weitere Vergleichsmethoden hinzugefügt, welche auf größer/kleiner basieren. Damit wird es möglich Elemente zu sortieren und diese dann auch auszulesen. Die Schwierigkeit bestand darin, dass auf die Typensicherheit geachtet werden muss, damit Objekte verglichen werden können. Weiters habe ich eine Funktion implementiert, welche es erlaubt Termine nacheinander zu erstellen, auch wenn der ursprüngliche Termin früher war.
+
+\section{Woche 7}
+In dieser Woche kümmerte ich mich zuerst um die Validierung und Speicherung von XML-Dateien, welche zu einem Schema validiert werden können. Somit kann überprüft werden ob die XML-Datei gültig ist. Auch habe ich die Möglichkeit zum Laden und Speichern von den Einstellungen bzw. Verbindungen vorgesehen.  Außerdem habe ich eine allgemeine Methode implementiert, die es ermöglicht beliebige XML-Dateien zu validieren.
+
+\section{Woche 8}
+Ich habe begonnen mein Projekt in zwei Teile aufzuteilen, das eine wurde "`core"' genannt und das andere "`web"'. Das erste beinhaltet alle backend Funktionen sowie die gesamte Businesslogik. Das zweite wird dann zur Webanwendung, welche auf einen Tomcat-Server laufen wird. Grundsätzlich kann von einer Zwei-Schichten Architektur gesprochen werden, da die Datenbankschicht im Endeffekt nur eine Mock-Implementierung darstellt und daher nicht mit einer Datenbank verbunden ist. 
+
+
+\section{Woche 9}
+Diese Woche startete mit der Implementierung  einer weiteren backend Funktion, welche direkt in der Anwendung integriert ist, und ein sogenanntes "`Masterdata"' darstellt. Diese Struktur eines \textit{masterdata-feature} ist immer gleich. Die einzelnen Datenfelder werden in einer H2-Datenbank gespeichert und können über Services und eine definierte API an das Frontend weitergereicht werden. Anfangs war es schwer die Struktur zu verstehen, aber nach und nach hatte ich es verstanden und konnte es richtig anwenden.
+
+\section{Woche 10} 
+Als erstes Feature implementierte ich ein sogenanntes \textit{Masterdata-Feature}. Dieses beinhaltet die frontend sowie die backend-Implementierung einer Filterkomponente. Die Oberfläche bzw. die Webanwendung besteht aus vielen Modulen bzw. Features, von denen die meisten unabhängig sind. Daher war es sehr einfach ein neues Feature in die bestehende Struktur einzubinden.
+
+\section{Woche 11}
+Als zweites Feature folgte in dieser Woche der eigentliche Filter. Dieser besteht aus Filterkomponenten, welche den eigentlichen Filter beinhalten. Dann können den  einzelnen Filtern Komponenten zugeordnet werden und die gesamte Struktur wird als eine gesamte Realtion in der Datenbank gespeichert. Dies hat den Vorteil dass die Filter und die Filterkomponenten frei kombiniert werden können. Dies erleichtert die Verwendung erheblich.
+
+\section{Woche 12} 
+Als nächstes Feature folgte die relationale Abhängigkeitsdarstellung, welche durch eine \textit{Many To Many} Relation verwirklicht wird. Diese Relation ist notwendig um mehre Filterkomponenten mehreren Filtern zuzuordnen. Da es keine programmiertechnische Umsetzung gibt, muss dabei auf zwei \textit{One To Many} bzw. \textit{Many To One} Relation zurück gegriffen werden. Dies zu realisieren ist relativ komplex und kann nur durch drei Klassen gelöst werden.
+
+\section{Woche 13}
+Nachdem ich die Relation im Backend erfolgreich erstellt habe, folgte nun die repräsentative Darstellung der Beziehung im Frontend. Diese wird in einer Tabelle bzw. Liste angezeigt. Im Filter werden alle Filterkomponenten zur Verfügung gestellt und können vom Anwender ausgewählt werden. Die Liste wird mit AngularJS erstellt und ist relativ komplex. 
+
+\section{Woche 14}
+Das Filter-Feature wurde so umgebaut, dass jeder Filter seine eigenen Komponenten beinhaltet. Dies erleichtert die persistente Datenhaltung. Die vorhandene \textit{Many To Many} Relation wird durch eine einfachere Relation ersetzt. Außerdem erleichtert dieser Umbau die Bedienung, da alle Filter nun als getrennt angesehen werden können. 
+
+\section{Woche 15}
+Durch die Umstellung des Filter-Feature konnte nun mit der Übertragungsfunktion der "`Appointments"' begonnen werden. Diese beinhaltet das Auslesen von vordefinierten "`Appointments"' mithilfe von Filtern. Die so erhaltenen Suchergebnisse werden dann in Outlook-Termine konvertiert. Diese werden in weiterer Folge an den Exchange-Server übermittelt und im jeweiligen Postfach bzw. Kalender angezeigt.
+
+\section{Woche 16}
+In der letzten Woche des Praktikums wurde das Frontend fertig entwickelt, um eine geeignete Schnittstelle zu bieten, welche an das Backend angebunden werden kann. Im Backend werden die Daten vom Frontend verarbeitet und dann an den Server übermittelt. Da diese Schnittstelle bzw. API universell ist, kann diese beliebig verwendet und ausgetauscht werden. Sie folgt den Regeln eines Client\(<=>\) Server System um die Handhabung zu erleichtern. Zum Abschluss folgte eine Vorstellung des Projektes und die Rückgabe der Hardware.  
+

@@ -1,0 +1,12 @@
+\chapter{Einleitung}
+
+\section{Einführung}
+Diese Arbeit ist der Praktische Teil der Bachelorarbeit und wurde im Rahmen des Semesterpraktikums verfasst. Das Praktikum im Umfang von 16 Wochen wurde bei der Firma CGM Clinical Austria am Standort Linz absolviert. CompuGroup Medical (CGM) ist der einzige österreichische Softwarehersteller, der umfassende IT-Lösungen zur Optimierung des Gesundheitswesens produziert. Software-Lösungen, welche die Prozesse von niedergelassenen Ärzten und dessen Personal sowie von medizinischem, pflegerischem und administrativem Krankenhauspersonal unterstützen. Die CGM beschäftigt in Österreich 250 Mitarbeiter.
+
+\section{Zielsetzung}
+Das Modul MRP errechnet ideale Termine für Operationen in einem Krankenhaus unter der Berücksichtigung aller beteiligter Ressourcen ( Personen ,Geräte, Material) und aller vor und nachgelagerten Untersuchungen sowie Bett und Zimmer. Ziel dieses Projektes ist es für alle ressourcenbezogenen Daten (z.B. Dienste von Ärzten , OP Termin mit spezifischen Ärzten) eine Möglichkeit zu schaffen, Termine in den persönlichen Kalendern der Personen (Teams) anzuzeigen, damit die Anwender in ihrer gewohnten Umgebung die Ergebnisse des komplexen Planungsprozesses vermittelt bekommen. Darüber hinaus wäre eine Darstellung auf mobilen Geräten möglich. Programmiert wird in Java EE und AngularJs.
+ 
+\section{Motivation für die Anwendung der EWS-API}
+Grundsätzlich wird davon ausgegangen, dass Termine im Outlook eingetragen werden. Dies sollte automatisch nach der Generierung von vorgegebenen Terminvorschlägen geschehen. Diese Terminvorschläge werden als Teil des MRP-Systems generiert. Die Aufgabe war es mit Hilfe der Java EWS API die Daten an das Outlook zu senden bzw. an den Server zu übermitteln. Die EWS API erleichtert das Arbeiten mit Outlook enorm.\\
+
+Bei relativ flexibler API, kann sowohl Java, C\# als auch  XML verwendet werden. Die Termine werden dabei in Outlook-Kalendern dargestellt. Änderungen von Terminen haben keine Auswirkung auf das MRP System. Weiters können sogenannte "`Appointments"' mit Hilfe von vordefinierten Filtern gesucht und exportiert werden. Dies ermöglicht eine einfachere Handhabung von Abfragen. Die Appointments werden dann in Outlook-Termine umgewandelt und können so exportiert werden. 

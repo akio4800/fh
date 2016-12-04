@@ -1,0 +1,31 @@
+\chapter{Projektbericht}
+\section{Projekt}
+Die Aufgabe dieses Projektes war es die Termine des MRP Systems zu filtern und ausgewählte Termine in Outlook-Kalendern zu exportieren. Dies wird mit Hilfe der Java EWS API realisiert. Da das MRP System aus Frontend und Backend besteht war es notwendig beide \textit{Seiten} zu programmieren.\\
+
+Um die Anbindung an einen Outlookserver zu ermöglichen wurden im Backend Schnittstellen entwickelt, welche Termine an den Server senden und auch wieder abrufen können. \\
+
+Im Backend sind zu den bereits vorhandenen Masterdata-Funktionen zwei weitere dazugekommen. \\
+
+Die Erste ist die Filter-Funktion, welche es ermöglicht zusammengesetzte Filter zu erstellen und diese in einer Datenbank abzulegen. Diese Filter dienen zum Filtern von vordefinierten Appointments, welche in einer Datenbank gespeichert sind. Die gefilterten Appointments werden an das Frontend weitergeleitet und dort angezeigt.\\
+
+Die zweite Funktion ist die Abfrage der gefilterten Appointments vom Frontend. Das Frontend sendet eine Liste von Appointments an das Backend. Diese Termine werden dort geprüft , in outlookkonforme Termine konvertiert und an den Server übermittelt. Diese können dann in den jeweiligen Kalendern eingesehen werden.\\ 
+
+Das Backend kommuniziert mit den Frontend über Services und Komponenten und diese sind daher frei austauschbar. Im Backend gibt es weitere Funktionen, welche explizit getrennt von der Hauptfunktion implementiert worden sind. Diese Funktionen dienen hauptsächlich zum Lesen und Schreiben von XML und JSON Dokumenten sowie für serverspezifische Abfragen.
+
+
+Auch im Frontend sind zu den bereits bestehenden Funktionen zwei weitere dazugekommen. Die Erste regelt das Anlegen und Abrufen von Filtern aus dem Backend anhand vorgegebener Filter, die von den gefilterten Daten abgerufen werden können.  Es kann somit keine falschen Angaben geben. Die erstellten Filter werden im Backend in der Datenbank gespeichert, gesammelt, abgerufen und angezeigt. \\
+
+Die zweite Funktion ruft vom Backend alle Filter ab und zeigt diese in einer Liste an. Mit diesen Filtern können die zugehörigen Appointments abgefragt und in einer weiteren Liste angezeigt werden. Die Liste enthält alle wichtigen Informationen von den gefilterten Appointments. Die gelisteten Appointments können selektiert und dann exportiert werden. Dabei wird der gesamte Datensatz an das Backend geschickt und dort weiter verarbeitet. Das Backend meldet dem Frontend etwaige Fehlermeldungen und schickt die Daten an den Outlookserver.
+
+\section{Arbeitsbericht}
+\subsection{Beschreibung}
+Die Praktikumsarbeit besteht aus einer Backend-Komponente und aus einer Frontend-Komponente, welche zum Abfragen und zum Erstellen von Terminen geeignet ist. Das Backend ist in Java programmiert und das Frontend in Angular JS. Die Client-Server-Kommunikation baut auf dem Prinzip der Komponentenservices auf. Die Kommunikation wird über separat definierte Schnittstellen abgewickelt. Die Übertragung der Daten erfolgt mit Hilfe von JSON-Dateien.  Die Abfrage der Appointments wird durch anpassbare wiederverwendbare Filter realisiert, welche in einer Datenbank hinterlegt werden können. Die Appointments werden direkt aus der Datenbank mithilfe der vordefinierten Filter abgerufen und die Ergebnisse werden angezeigt. Ausgewählte Appointments können exportiert werden und  scheinen dann in den jeweiligen Outlook-Kalendern auf. Diese Appointments repräsentieren meistens die Öffnungszeiten von diversen Stationen, können aber auch spezifische Termine von Personen und/oder Verfügbarkeiten enthalten. Außerdem kann geprüft werden ob bei dem Export etwaige Konflikte auftreten. Diese können durch Vorschläge gelöst werden. 
+\subsection{Bericht}
+Zu Beginn des Praktikums habe ich meinen Arbeitslaptop erhalten und eingerichtet. Weiters startete  ich auch mit der Recherche über die Java EWS API. Als erstes habe ich mich mit der Einrichtung der Outlookkonten beschäftigt und auch ein kleines Testprogramm fertiggestellt.\\
+
+ Als nächstes habe ich einen XML und JSON Reader programmiert, der es mir ermöglichte beliebige Dateien einzulesen. Dann folgte der dazugehöriger Writer, welcher diese Dateien schreiben kann. In weiterer Folge implementierte ich einen DTO Konverter, welche die Daten in DTOs umwandelte. \\
+
+Als nächstes folgte der Kontaktservice, welcher Daten zu Kontakten abfragen kann. Auch wurde das Projekt in das MRP GIT Repo integriert um ein gemeinsames Projekt zu schaffen. Nach der Integration programmierte ich einen Connector-Service, welcher eine Verbindung zum MRP System herstellte. Als nächstes habe ich ein generisches Filtersystem entwickelt, welches den Vergleich von verschieden Datentypen zulässt. Dieses System ermöglicht es die Appointments und Termine effizient zu filtern und abzurufen.\\
+
+Ich habe dann begonnen zwei Masterdata-Features zu implementieren, welche eine Erstellung und Speicherung von Filtern zulässt. Weiters implementierte ich das Masterdata-Feature, welches Appointments mit Hilfe von den vordefinierten Filtern abzurufen und exportieren kann. Die jeweiligen Features beruhen auf den Client-Server-Prinzip, welches aus Backend und Frontend besteht.
+

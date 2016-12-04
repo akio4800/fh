@@ -1,0 +1,35 @@
+\chapter{Design}
+In diesen Kapitel werden die möglichen Konzepte zur Übertragung von Daten ins Outlook beschrieben. Im Prinzip gibt es 3 verschiedene Konzepte zum gegenständlichen Thema:
+\section{Konzept 1: Manuelle Interaktion mit der Outlookoberfläche}
+Der User verwendet das Outlook und hat dabei die Möglichkeit folgende Funktionen zu verwenden:
+\subsection{Exchange Server}
+Der Microsoft Exchange Server ist eine Server-Software des Unternehmens Microsoft. Er dient der zentralen Ablage und Verwaltung von E-Mails, Terminen, Kontakten, Aufgaben. Der  Server setzt eine Microsoft-Windows-Server-Software voraus und findet deshalb vor allem in von Microsoft-Produkten geprägten Infrastrukturen Verwendung. Um als Anwender die Funktionen von Exchange Server nutzen zu können, ist eine zusätzliche Client-Software nötig. Microsoft liefert dafür das separate Programm Microsoft Outlook.
+\subsection{Emails}
+Emails können gesendet, empfangen u. in diversen Ordnern hinterlegt werden. Neue Emails können Termine enthalten, welche als Termineinladungen gelten u. nach der Bestätigung in den Kalender übertragen werden. Weiters ist eine schnelle Abfrage der im persönlichen Ordner gespeicherten Emails durch eine ausgeklügelte Suchfunktion möglich.
+\subsection{Termine und Kalender}
+Jeder Benutzer verfügt mindestens über einen Kalender. Dieser Kalender besitzt alle persönlichen Termine sowie die firmenmäßige Umwelt. Weiters werden zusätzliche Termine wie Feiertage, Geburtstage etc. angezeigt. Eine Option ist die Übermittlung von Texten bei den Ein-/Ausladungen.
+Darüber hinaus können ganze Gruppen eingeladen werden. Eine Erinnerungsfunktion wird als eine weitere Servicefunktion angeboten.
+\subsection{Aufgaben}
+
+Aufgaben sind da, um Notizen zu machen, welche abgearbeitet werden müssen. Diese sind keiner Person zugeordnet und finden sich in einem separaten Punkt im Outlook wieder.
+\subsection{Kontakte / Adressen}
+Kontakte können erstellt werden, wenn eine Emailadresse bzw. eine Telefonnummer vorhanden ist. Kontakte sind in Gruppen unterteilt und können als Gruppe einen Termin zugewiesen werden. Eine Gruppe kann Kontakte enthalten sowie noch weitere Informationen der jeweiligen Person. 
+\subsection{Globales Adressbuch}
+Alle Kontakte sind nach Gruppen geordnet u. eingeteilt. Diesbezüglich sind Such- bzw. Filterfunktion verfügbar.
+\subsection{Outlook Web App}
+Mithilfe des Outlook Web Access kann im Browser und den Zugangsdaten für das eigene Outlookkonto auf Emails, Kontakte und Aufgaben zugegriffen werden. Die EWS-API hat die gleiche Funktionalität wie die Webschnittstelle, da diese nach dem selben Prinzip funktioniert. Es gibt eine mobile Outlookversion, die mithilfe der Webschnittschnittstelle auf den Outlookserver bzw. Outlook zugreift.
+
+\section{Konzept 2: Ansteuerung von Outlook mit Hilfe von EWS}
+Der Benutzer verfügt über Programmierkenntnisse u. kann die Schnittstelle ansteuern und verwenden.
+Die EWS API wird von Microsoft zur Verfügung gestellt und dient zur Ansteuerung von Outlook über eine geeignete Programmiersprache. Diese API beinhaltet dieselbe Funktionalität wie die Webschnittstelle u. arbeitet nach denselben Prinzip der Webschnittstellen. EWS bietet zusätzliche Funktionen zu der Webschnittstelle wie Abfragen von Verfügbarkeiten und Benachrichtigungen. Die EWS API ermöglicht den Programmierer eine einfachere Ansteuerung von Outlookservern. Die Schnittstelle bietet eine ausreichende Funktionalität, sodass im Outlookclient keine manuellen Aktionen durchgeführt werden müssen.
+
+\section{Konzept 3: Ansteuerung mittels MRP}
+MRP ist ein von CGM entwickelte Software, die optimale Termine für Operationen in einem Krankenhaus unter der Berücksichtigung aller beteiligter Ressourcen berechnet. Das MRP-Modul beinhaltet folgende Funktionalitäten:\\
+\begin{enumerate}
+	\item Zu Beginn müssen die verfügbaren Ressourcen (Person, Raum, Material, Gerät, Bett) angelegt und zugeordnet werden.  
+	\item Zuordnung der ressourcenbezogenen Daten: Jeder  Ressource werden Informationen beigegeben
+	\item Aus den Ressourcen werden mithilfe von Kapazitäten Einheiten gebildet.
+	\item Aus diesen Einheiten werden Vorschläge gebildet. Diese Vorschläge beinhalten lediglich eine zeitliche Spanne. Um einen Termin festlegen zu können müssen Ressourcen zugeordnet werden. Dies entsteht aus den bereits hinterlegten Personendaten sowie aus den Verfügbarkeitsabfragen der EWS Schnittstelle. Mit diesen erweiterten Funktionen können konkrete Termine generiert u. nach deren Bestätigung ins Outlook exportiert werden. Die exportierten Termine können im betreffenden Kalender eingesehen werden. Das Anlegen von Ressourcen u. das Selektieren von exportierten Terminen erfolgt manuell.
+\end{enumerate}	
+
+

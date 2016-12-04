@@ -1,0 +1,69 @@
+\chapter{Implementierung}
+In diesen Kapitel wird beschrieben wie mit Hilfe des MRP-Systems, die in der Zielsetzung aufgelisteten Punkte im Outlook implementiert wurden. Alle Unterpunkte beschreiben jeweils eine eigenständige Funktionalität, wobei es vorkommt, dass Klassen andere Klassen von Modulen verwenden können. Jede Unterkategorie besteht aus einer Beschreibung der Funktionalität und einer kurzen Beschreibung der Methoden innerhalb des Moduls. Dabei wurden die Funktionen der EWS-API verwendet und in den Methoden de nachfolgenden Modulen aufgerufen: 
+\section{Outlook}
+Jedes der einzeln unten beschriebenen Packages bezieht sich auf die jeweilige Klasse: 
+\begin{itemize}
+	\item \textit{Packagename + Service }
+	\item \textit{I + Packagename + Service}
+	\item \textit{Packagename + Dto}
+\end{itemize}
+Die jeweilige Klasse des Packages implementiert eine vordefinierte Schnittstelle (Interface), welche einen vordefinierten Benennungssystem folgt. Die unten genannten Funktionalitäten sind unabhängig vom MRP -System, können aber in diesem benutzt werden. Die verwendeten Datentypen bzw. Datenklassen sind im Package \textit{Model} definiert. Diese Klassen können gleichnamige Klassen im MRP haben, aber haben keine Beziehung zu diesen Klassen. 
+\subsection{Appointments}
+\subsubsection{Erklärung}
+Mit Hilfe des Appointmentservices können Outlook-konforme Appointments angelegt, verwaltet , und abgerufen werden. Der \textit{AppointmentService} implementiert das zugehörige Interface \textit{IAppointmentService} und verwendet den Datentyp \textit{AppointmentDto}.
+\subsubsection{Methoden}
+Die wichtigste Funktion ist die Methode \textit{createAppointment}, mit der Appointments angelegt werden. Der \textit{ExchangeService} wird als Parameter übergeben. Die Methode \textit{buildAppointment} baut den Datentyp \textit{Appointment} zusammen. Die Methode \textit{createAppointments} ermöglicht das gleichzeitige Speichern und Anlegen von mehreren Appointments. \\
+
+Eine weitere Funktionalität ist durch die Methode \textit{hasConflictedAppoinments} gegeben. Diese Funktion überprüft mit Hilfe des Exchangeservers etwaige Konflikte bei betreffenden Appointments. \\
+
+Die Funktionen \textit{appointmentListToXML}, \textit{xmlToDto} und \textit{xmlToAppointmentList} ermöglichen die Verwaltung von outlookkonformen Appointments mithilfe von XML.
+\subsection{Availability}
+\subsubsection{Erklärung}
+Durch den Availabilityservice können Verfügbarkeiten von Personen und Räumen abgefragt werden. Der \textit{AvailabilityService} implementiert das zugehörige Interface \textit{IAvailabilityService} und verwendet den Datentyp \textit{AvailabilityDto}.
+\subsubsection{Methoden}
+Die Hauptfunktion \textit{checkAvailability} ruft mit Hilfe des \textit{ExchangeService} Verfügbarkeiten über die EWS-Schnittstelle ab. Diese Funktion wird in fast jeder anderen Methode aufgerufen. Die Methode \textit{checkAvailbilityForPerson} überprüft die Verfügbarkeit von einer oder mehreren Personen anhand deren Email-Adressen. Mit Hilfe der Methode \textit{checkAvailbilityForRooms} können im Gegensatz zur vorherigen Methode statt Personen Räume abgefragt werden. Die beiden Funktonen \textit{getAllRooms} und \textit{getRoom} liefern einen oder mehrere Räume zurück. Jede Person sowie jeder Raum wird durch die jeweilige Email repräsentiert. 
+\subsection{Kalender}
+\subsubsection{Erklärung}
+Der Kalenderservice kann neue Kalender im eigenen Postfach anlegen und diese wieder abrufen. Der \textit{CalendarService} implementiert das zugehörige Interface \textit{ICalendarService} und verwendet den Datentyp \textit{CalendarDto}.
+\subsubsection{Methoden}
+Die Mehode \textit{getCalendars} ruft alle verfügbaren Kalender einer Emailadresse ab. Die Emailadresse repräsentiert eine Person oder einen Raum. Zusätzliche Kalender werden durch die Methode \textit{createNewCalendar} realisiert. Diese Funktion liefert ein Ergebnis zurück, ob der Kalender angelegt werden konnte.
+\subsection{Kontakt}
+\subsubsection{Erklärung}
+Der Kontaktservice ermöglicht das Anlegen, Abrufen und Verwalten von Outlookkontakten in den jeweiligen persönlichen Adressbüchern. Der Kontaktservice arbeitet standardmäßig mit dem Benutzer des Exchangeservices. Der \textit{ContactService} implementiert das zugehörige Interface \textit{IContactService} und verwendet den Datentyp \textit{ContactDto}.
+\subsubsection{Methoden}
+Die Methode \textit{getContacts} ruft alle persönlichen Kontakte des derzeit angemeldeten Benutzers aus seinen Globalen Adressbuch ab und zeigt diese in einer \textit{pageSize}-großen Liste an. Diese Größe kann durch den jeweiligen Programmierer beliebig gewählt werden. Alle Kontakte sind standardmäßig unsortiert und können durch Filter zusätzlich aussortiert werden. Neue Kontakte werden über die Funktion \textit{buildContact} zusammengebaut. Die Funktion \textit{getContactDtos} liefert mithilfe der Funktion \textit{buildContact} eine Liste vom vordefinierten Datentyp \textit{ContactDto}. 
+\subsection{Email}
+\subsubsection{Erklärung}
+Der Emailservice ermöglicht das Senden von vordefinierten Emails. Diese beinhalten alle relevanten Felder, welche im Outlook zu finden sind. Weiters können alle Emails aus dem jeweiligen Postfach des Benutzers aufgerufen werden. Der \textit{EmailService} implementiert das zugehörige Interface \textit{IEmailService} und verwendet den Datentyp \textit{EmailDto}.
+\subsubsection{Methoden}
+Durch die Mehode \textit{sendEmail} können Emails versendet werden. Diese werden in der Mehode \textit{buildEmail} erstellt und enthalten alle relevanten Informationen zu Sender und Empfänger sowie Betreff und Emailtext. Die Methode \textit{getEmails} ruft eine vordefinierte Anzahl Emails aus dem eigenen Posteingang ab. 
+\subsection{Exchangeservice}
+\subsubsection{Erklärung}
+Der Exchangeservice dient als zentrale Verbindung zum Outlook. Diese Vordefinierte Klasse wird bei fast jeder Methode der anderen Features als Parameter mitgegeben. Die Klasse wird \textit{ExchangeServiceConnector} genannt und ist zuständig für die Verbindung zum Server und für die Anfragen von den anderen Features. Dieser Service bezieht sich nur auf das eigene Outlookkonto bzw. auf das Konto, welches mit Passwort und Benutzername angegeben wird. Weiters kann definiert werden, welche Exchangeserverversion verwendet werden muss. Diese Klasse implementiert das zugehörige Interface \textit{IExchangeServiceConnector}.
+\subsubsection{Methoden}
+Die Serververbindung wird mit Hilfe der Methode \textit{createServerConnection} aufgebaut, wobei der Benutzername und das Passwort mitgegeben werden. Innerhalb der Methode wird definiert, welche Art von Verbindung verwendet werden soll. Die gleichnamige Methode verwendet zusätzlich zu den beiden Parametern auch noch einen weiteren Parameter, welcher die Server-URL ist. Die XML konforme Methode \textit{createServerConnection} kann mit Hilfe eines XML-Dokument eine Serververbindung aufbauen. Alle drei genanten Methoden retournieren den Exchangeservice, welcher dann für alle anderen Features verwendet wird. Mit der Methode \textit{saveSettingsToXML} können die derzeitigen Servereinstellungen in einem XML-Dokument geschrieben werden. 
+\subsection{Filter}
+\subsubsection{Erklärung}
+Die Filter dienen dazu, dass beliebige Datentypen verglichen und somit gefiltert werden können. Diese Filter folgen dem Prinzip der überpersistenten Speicherung. Dies bedeutet, dass bereits gefilterte Daten trotzdem erhalten bleiben. Grundsätzlich ist jeder Filter aus zwei Teilen aufgebaut: Der erste Teil beinhaltet die relevanten Daten zu den jeweiligen Filter selbst. Der zweite Teil beinhaltet die zu filternden Daten, welche bis zum Ende gespeichert bleiben. Weiters beinhaltet jeder Filter sogenannte Filterkomponenten, welche selbst Filter sind, da der eigentliche Filter nur ein Container für solche Filter ist. Eine weitere Funktionalität ist der Vergleich von Methoden mit den Variablen. Dies bedeutet, dass der eigene Variablenname nicht bekannt sein muss. 
+\subsubsection{Methoden}
+Die Mehode \textit{apply} beschreibt die Hauptfunktionalität des Filters und beinhaltet alle Funktionalitäten, die zur Anwendung eines bestimmten Filters notwendig sind. Das \textit{FilterDto} beinhaltet sowohl die Filter als auch die zu filternden Daten. Mit der Methode \textit{applySimpleFilter} wird ein Filter auf eine Sammlung von zu filternden Objekten angewendet. Die Funktion \textit{applyFilter} wird dann verwendet, wenn alle zu filternden Objekte den Typ \textit{AppointmentComponent} besitzen. Die zwei Funktionen \textit{applyHelixFilter} werden dann verwendet, wenn die Filter vom MRP-System stammen. Die Funktionen \textit{getFiltered} und \textit{getUnfiltered} dienen zum Abrufen von gefilterten und ungefilterten Daten eines \textit{FilterDto}s
+\subsection{Model}
+Die verwendeten Objekte in einzelnen Features bzw. Packages werden im Model repräsentiert. Die einzelnen Klassen repräsentieren die jeweiligen Datentypen, welche einer vordefinierten Struktur folgen. Diese folgt der Bean-Definition. Dieses bedeutet, dass alle Membervariablen \textit{private} sind und daher muss auf diese Variablen mit Getter und Setter zugegriffen werden. Die einzelnen definierten Datentypen besitzen einen öffentlichen Konstruktor ohne Parameter.
+\section{Masterdata}
+\subsection{Beschreibung}
+Jedes Feature im MRP-System folgt immer der selben Struktur. Jedes Feature besteht aus den Teilen API, Component, Datenbank und Service. Dabei wird die Drei-Schichten-Architektur realisiert. Dieses bedeutet, dass es drei unterschiedliche Implementierungsweisen gibt, welche als getrennt angesehen werden können. Die unterste Schicht wird als Datenbank-Schicht bezeichnet und ist zuständig für die Verwaltung von persistenten Daten. Die Mittlere Schicht wird als Business-Logik bzw. Verarbeitungsschicht bezeichnet. Diese ruft die Daten von der untersten Schicht auf und leitet sie gegebenenfalls an die oberste Schicht weiter oder es werden spezifische Änderungen durchgeführt. Die oberste Schicht wird als Präsentationsschicht bezeichnet und ist zuständig für die visuelle Darstellung der Daten. Die 3-Schichten-Architektur hat den Vorteil, dass die Aufgaben der Schichten klar von einander getrennt sind. Weiters gibt es die Component-Service-Implementation, welche aus den Komponenten, Datenbank, Service, und API bestehen.
+\subsection{Struktur}
+Jedes Feature folgt der Component-Service-Implementation, welche aus folgenden Teilen besteht:
+\subsubsection{Datenbank}
+Das Datenbankfeature verwaltet alle Daten in einer vordefinierten Datenbanktechnologie, die variabel auswählbar ist. Die Datenbank kann entweder SQL oder file-basiert sein. Das Speichern und Abrufen von Daten wird über den jeweiligen Datenbanktreiber betrieben, welcher mit einer standardisierten Datenbankansteuerung kommuniziert. Dieser befindet sich innerhalb eines \textit{Data Access Object}. Dieses Objekt beinhaltet alle relevanten Datenbankzugriffsfunktionen und liefert ein DTO.
+\subsubsection{Service}
+Der Service bekommt Daten von der Datenbank und schickt sie an die Components weiter. Die Services dienen den Components für eine erleichterte Abfragemöglichkeit von Datenobjekten. Weiters benötigen die Services vordefinierte Filterfunktionen. Die Funktionalität der Services gehört der Bussinnes-Logik-Schicht an.
+\subsubsection{Components}
+Die Components stellen im Feature die Hauptbestandteile dar. Diese repräsentieren die eigentliche Logik, da in diesen Funktionen die gesamte Verarbeitung der Daten erfolgt.
+Die Components erhalten die Daten aus der Datenbank und wandeln diese Daten in \textit{Data Transfer Objects} um. Diese Objekte werden an die API weitergeleitet.
+\subsubsection{API}
+Die API ist ein Teil der Businessschicht und stellt die Verbindung zum Frontend da. Die API bekommt die Daten von den Components und wandelt diese in webkonforme Übertragungsobjekte um, welche dann an das Frontend weitergeleitet werden. Außerdem ist die API zuständig für das Empfangen von Daten auf dem Frontend.
+\subsubsection{Frontend}
+Das Frontend repräsentiert die Präsentationssschicht, welche für den jeweiligen Benutzer sichtbar ist. Im Frontend werden alle Benutzerinteraktionen verwaltet und alle eigenen Daten zu Transferobjekte umge wandelt und an das Backend gesendet.
+
+ 
