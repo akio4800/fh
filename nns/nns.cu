@@ -11,7 +11,13 @@
 using namespace std::literals;
 
 __constant__ auto const g_block_size = 128;
-__constant__ auto const g_points = 50000;
+__constant__ auto const g_points = 60000;
+
+
+
+
+
+
 
 dim3 grid_size(dim3 const & block, int3 const & size) {
 
@@ -104,17 +110,68 @@ __global__ void find_all_closest_GPU(
 
 }
 
-void find_all_closest_CPU(
+std::vector<std::pair<int, int>> pointrange(int num) {
+
+	std::vector<std::pair<int, int>> vec;
+	int range = g_points / num;
+		std::pair<int,int> r;
+		r.first = 0;
+		r.second = range;
+
+	for (size_t i = 0; i < num; i++)
+	{
+		vec.push_back(std::pair<int, int> (r.first,r.second-1) );
+		r.first += range;
+		r.second += range;
+		
+	}
+	return vec;
+}
+
+void find_all_closest_CPU_SC(
 	float3 * const hp_points, int * const hp_indices_h
 ) {
-
-
-	for (size_t i = 0; i < g_points - 1; i++)
+	for (size_t j = 0; j <g_points; j++)
 	{
-		hp_indices_h[i] = find_closest(hp_points, hp_points + i);
+		hp_indices_h[j] = find_closest(hp_points, hp_points + j);
 	}
 
+}
 
+
+
+
+
+
+void find_all_closest_CPU_MC(
+	float3 * const hp_points, int * const hp_indices_h,std::vector<std::pair<int,int>> parts
+) {
+
+	
+
+	std::vector<std::thread> group;
+
+
+	for (int i = 0; i < parts.size(); i++)
+	{
+
+	
+
+			group.emplace_back([&parts,i,hp_indices_h,hp_points]() {
+
+			for (size_t j =parts.at(i).first ; j <parts.at(i).second; j++)
+	{
+		hp_indices_h[j] = find_closest(hp_points, hp_points + j);
+	}
+
+			});
+		
+	}
+
+	for (auto &t : group)
+	{
+		t.join();
+	}
 }
 
 
@@ -135,11 +192,13 @@ void allocate_memory(
 	hp_indices_d = new int[g_points] {};
 	hp_indices_h = new int[g_points] {};
 	hp_points = new float3[g_points]{};
-
+	
 
 	dp_indices = PFC_CUDA_MALLOC(int, g_points);
 	dp_points = PFC_CUDA_MALLOC(float3, g_points);
 
+	double m = (((3.0 * sizeof(int) + 2.0 * sizeof(float3))*g_points) / 1024.0) / 1024.0;
+	std::cout << "Memory allocated : " << m <<" Mib"<< std::endl;
 }
 
 void free_memory(
@@ -154,24 +213,12 @@ void free_memory(
 	delete[] hp_points; hp_points = nullptr;
 	delete[] hp_indices_h; hp_indices_h = nullptr;
 	delete[] hp_indices_d; hp_indices_d = nullptr;
-
-
+	double m = (((3.0 * sizeof(int) + 2.0 * sizeof(float3))*g_points) / 1024.0) / 1024.0;
+	std::cout << "Memory freed : " << m << " Mib" << std::endl;
 
 
 }
 
-
-/*
-__global__ void copy_string_kernel(char * dp_dest, char * dp_src, int size) {
-	int const t = blockIdx.x * blockDim.x + threadIdx.x;
-
-	if (t < size)
-	{
-		dp_dest[t] = dp_src[t];
-	}
-
-}
-*/
 
 
 int main() {
@@ -186,7 +233,12 @@ int main() {
 			auto deviceinfo = pfc::cuda::get_device_info();
 			auto deviceprops = pfc::cuda::get_device_props();
 
-			std::cout << "name: " << deviceprops.name << "\ncc: " << deviceinfo.cc_major << "." << deviceinfo.cc_minor << " \narch: " << deviceinfo.uarch << std::endl;
+			std::cout << "Name: " << deviceprops.name << "\ncc: " << deviceinfo.cc_major << "." << deviceinfo.cc_minor << " \nArch: " << deviceinfo.uarch << std::endl;
+
+			std::cout << "Points: " << g_points << std::endl;
+			std::cout << "Threads: " << g_block_size << std::endl;
+			std::cout << "Blocks: " << g_grid_size.x << std::endl;
+
 
 
 			int *  hp_indices_d = nullptr;
@@ -197,9 +249,11 @@ int main() {
 
 
 
-
+			std::cout << "allocating memory:" << std::endl;
 			allocate_memory(hp_indices_d, hp_indices_h, hp_points, dp_indices, dp_points);
-
+			
+			
+			std::cout << "generating points" << std::endl;
 			generate_points(hp_points);
 
 			std::cout << "CPU" << std::endl;
@@ -207,7 +261,7 @@ int main() {
 
 			auto const duration_cpu = pfc::timed_run([&] {
 
-				find_all_closest_CPU(hp_points, hp_indices_h);
+				find_all_closest_CPU_SC(hp_points, hp_indices_h);
 			});
 
 			auto cpu_time = std::chrono::duration_cast<std::chrono::milliseconds>(duration_cpu).count();
@@ -215,16 +269,13 @@ int main() {
 
 
 			std::cout << "GPU" << std::endl;
+			std::cout << "coping to device ("<< sizeof(float3)*g_points/1024.0/1024.0 <<" Mib)" << std::endl;
 			auto const duration_gpu = pfc::timed_run([&] {
 
+				
 				PFC_CUDA_MEMCPY(dp_points, hp_points, g_points, cudaMemcpyHostToDevice);
 
-				//int const big = (g_points + g_block_size + -1) / g_block_size;
-
-
-				find_all_closest_GPU << <g_block_size,g_grid_size >> > (dp_points, dp_indices);
-
-				//copy_string_kernel << <big, tib >> > (dp_dest, dp_src, size);
+				find_all_closest_GPU << <g_grid_size,g_block_size >> > (dp_points, dp_indices);
 
 				
 				PFC_CUDA_MEMCPY(hp_indices_d, dp_indices, g_points, cudaMemcpyDeviceToHost);
@@ -233,15 +284,21 @@ int main() {
 
 			});
 
+			std::cout << "coping to host (" << sizeof(float3)*g_points / 1024.0 / 1024.0 << " Mib)" << std::endl;
+
 			auto gpu_time =  std::chrono::duration_cast<std::chrono::milliseconds>(duration_gpu).count();
 
-			std::cout << "CPU Time: " << cpu_time << " GPU Time: " << gpu_time << " Speedup: " << (cpu_time*1.0f) / (gpu_time*1.0f) << std::endl;
-			
-
 		
+			
+/*
+			for (size_t i = 0; i < g_points; i++)
+			{
+				std::cout << hp_indices_d[i] << "-" << hp_indices_h[i] << std::endl;
+			}
 
-			free_memory(hp_indices_d, hp_indices_h, hp_points, dp_indices, dp_points);
-
+			*/
+	free_memory(hp_indices_d, hp_indices_h, hp_points, dp_indices, dp_points);
+	std::cout << "CPU Time: " << cpu_time << " GPU Time: " << gpu_time << " Speedup: " << (cpu_time*1.0f) / (gpu_time*1.0f) << std::endl;
 		}
 
 
