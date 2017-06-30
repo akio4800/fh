@@ -42,9 +42,8 @@
 
 
 
-        <Button x:Name="add" Content="Add" Grid.Column="5" Margin="5" Grid.Row="11" MaxHeight="23" Click="Add_Click"/>
-        <Button x:Name="remove" Content="Remove" Grid.Column="6" Margin="5" Grid.Row="11" MaxHeight="23"/>
-        <Grid  Grid.Row="11" Grid.ColumnSpan="5" >
+      
+        <Grid  Margin="5,0,5,0" Grid.Row="11" Grid.ColumnSpan="8" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
@@ -56,18 +55,25 @@
                 <ColumnDefinition/>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <ComboBox x:Name="type" Margin="5,0" MaxHeight="23" Grid.Column="1"/>
-            <ComboBox x:Name="ability" Margin="5,0" MaxHeight="23" Grid.Column="2"/>
-            <TextBox x:Name="pr"  Text="0" Grid.Column="3" MaxHeight="23" Margin="5,0" VerticalContentAlignment="Center"/>
+            <ComboBox x:Name="type" Margin="5,0" MaxHeight="23" />
+            <ComboBox x:Name="ability" Margin="5,0" MaxHeight="23" Grid.Column="1"/>
+            <TextBox x:Name="pr"  Text="0" Grid.Column="2" MaxHeight="23" Margin="5,0" VerticalContentAlignment="Center"/>
+            <TextBox x:Name="lvl"  Text="0" Grid.Column="3" MaxHeight="23" Margin="5,0" VerticalContentAlignment="Center"/>
             <ComboBox x:Name="first" Margin="5,0" MaxHeight="23" Grid.Column="4"/>
             <TextBox x:Name="firstval" Text="0" Grid.Column="5" MaxHeight="23" Margin="5,0" VerticalContentAlignment="Center"/>
             <ComboBox x:Name="second" Grid.Column="6" Margin="5,0" MaxHeight="23"/>
             <TextBox x:Name="secondval" Text="0" Grid.Column="7" MaxHeight="23" Margin="5,0" VerticalContentAlignment="Center"/>
             <ComboBox x:Name="third" Grid.Column="8" Margin="5,0" MaxHeight="23"/>
             <TextBox x:Name="thirdval" Text="0" Grid.Column="9" MaxHeight="23" Margin="5,0" VerticalContentAlignment="Center"/>
+            <Button x:Name="add" Content="Add" Grid.Column="10" Margin="5" Grid.ColumnSpan="2"  MaxHeight="23" Click="Add_Click"/>
+            <Button x:Name="remove" Content="Remove" Grid.Column="12" Grid.ColumnSpan="2" Margin="5"  MaxHeight="23"/>
         </Grid>
-        <Grid  Grid.Row="10" Grid.ColumnSpan="5" >
+        <Grid Margin="5,0,0,0" Grid.Row="10" Grid.ColumnSpan="6" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
@@ -79,14 +85,15 @@
                 <ColumnDefinition/>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
+                
             </Grid.ColumnDefinitions>
-            <Label x:Name="type1" Margin="5,0"  Grid.Column="1" Content="Gem Type" VerticalContentAlignment="Bottom"/>
-            <Label x:Name="ability1" Margin="5,0"  Grid.Column="2" Content="Ability" VerticalContentAlignment="Bottom"/>
+            <Label x:Name="type1" Margin="5,0"   Content="Gem Type" VerticalContentAlignment="Bottom"/>
+            <Label x:Name="ability1" Margin="5,0"  Grid.Column="1" Content="Ability" VerticalContentAlignment="Bottom"/>
+            <Label x:Name="lvl1" Margin="5,0"  Grid.Column="2" Content="Level" VerticalContentAlignment="Bottom"/>
             <Label Grid.Column="3" Content="Powerrank" Margin="5,0" VerticalContentAlignment="Bottom"/>
             <Label Grid.Column="4" Grid.ColumnSpan="2" Content="First Stat" Margin="5,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Bottom"/>
             <Label Grid.Column="6" Content="Second Stat" Grid.ColumnSpan="2" Margin="5,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Bottom"/>
             <Label Grid.Column="8" Content="Third Stat" Grid.ColumnSpan="2"  Margin="5,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Bottom"/>
         </Grid>
-        <Label x:Name="msg" Content="Label" Grid.Column="7" Grid.Row="11" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
     </Grid>
 </Page>

@@ -39,7 +39,9 @@ namespace Trove_Stats.model
 
         public bool Equals(EmpGem other)
         {
-            return First == other.First && Second == other.Second && ;
+            return First  == other.First;
+
+           
         }
     }
 }

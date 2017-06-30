@@ -23,12 +23,23 @@ namespace Trove_Stats.model
             return StatValue + " " + StatType;
         }
 
-       public string StatType { get; set; }
+       
+
+        public string StatType { get; set; }
        public string StatValue { get; set; }
 
 
-        
-    
+       public static bool operator==(Stat left,Stat right)
+        {
+            return left.StatType == right.StatType && left.StatValue == right.StatValue;
+
+        }
+        public static bool operator!=(Stat left, Stat right)
+        {
+            return left.StatType != right.StatType && left.StatValue != right.StatValue;
+
+        }
+
 
     }
 }

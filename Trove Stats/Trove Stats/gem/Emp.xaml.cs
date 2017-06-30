@@ -60,7 +60,9 @@ namespace Trove_Stats.gem
             type.Items.Add("Air");
             type.Items.Add("Fire");
 
-            ability.Items.Add("None");
+            ability.Items.Add("Pyrodisk");
+            ability.Items.Add("Cubic Curtain");
+
 
             first.SelectedIndex = 0;
             second.SelectedIndex = 0;
@@ -83,9 +85,23 @@ namespace Trove_Stats.gem
             EmpGem gem = new EmpGem();
             if (type.SelectedItem != null)
             {
-                gem.GemType= type.SelectedItem.ToString();
+                gem.GemType = type.SelectedItem.ToString();
             }
-            if(first.SelectedItem != null && firstval.Text != string.Empty)
+
+            if (ability.SelectedItem != null)
+            {
+                gem.GemAbility = ability.SelectedItem.ToString();
+            }
+            if (lvl.Text != "")
+            {
+                gem.Lvl = int.Parse(lvl.Text);
+            }
+
+            if (pr.Text != "")
+            {
+                gem.PR = int.Parse(pr.Text);
+            }
+            if (first.SelectedItem != null && firstval.Text != string.Empty)
             {
                 gem.First.StatType = first.SelectedItem.ToString();
                 gem.First.StatValue = firstval.Text;
@@ -98,14 +114,15 @@ namespace Trove_Stats.gem
 
             if (third.SelectedItem != null && thirdval.Text != string.Empty)
             {
-                gem.Third.StatType = second.SelectedItem.ToString();
-                gem.Third.StatValue = secondval.Text;
+                gem.Third.StatType = third.SelectedItem.ToString();
+                gem.Third.StatValue = thirdval.Text;
             }
 
 
-            if (Data.Contains(gem)){
+            if (Data.Contains(gem))
+            {
 
-                msg.Content = "That gem already exits";
+              
             }
 
             Data.Add(gem);
