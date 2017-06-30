@@ -127,7 +127,23 @@ namespace Trove_Stats.gem
 
             Data.Add(gem);
 
+
+
             gemgrid.DataContext = Data;
+
+
+            first.SelectedIndex = 0;
+            second.SelectedIndex = 0;
+            third.SelectedIndex = 0;
+            ability.SelectedIndex = 0;
+            type.SelectedIndex = 0;
+
+
+            lvl.Text = "0";
+            pr.Text = "0";
+            firstval.Text = "0";
+            secondval.Text = "0";
+            thirdval.Text = "0";
         }
     }
 }
