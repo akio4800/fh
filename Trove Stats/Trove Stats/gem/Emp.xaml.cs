@@ -122,14 +122,30 @@ namespace Trove_Stats.gem
             if (Data.Contains(gem))
             {
 
-              
+            MessageBoxResult result =   MessageBox.Show("Want to add it anyways?", "Gem alredy exists", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                switch (result) {
+
+
+                    case MessageBoxResult.Yes:
+                        Data.Add(gem);
+                        gemgrid.DataContext = Data;
+                        break;
+
+                    case MessageBoxResult.No:
+                        /* ... */
+                        break;
+                    
+                        }
+            }
+            else
+            {
+                Data.Add(gem);
+                gemgrid.DataContext = Data;
+
             }
 
-            Data.Add(gem);
-
-
-
-            gemgrid.DataContext = Data;
+           
 
 
             first.SelectedIndex = 0;
