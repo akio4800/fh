@@ -119,47 +119,79 @@ namespace Trove_Stats.gem
             }
 
 
-            if (Data.Contains(gem))
+
+
+            if (!check_gem_type(gem))
             {
 
-            MessageBoxResult result =   MessageBox.Show("Want to add it anyways?", "Gem alredy exists", MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
-                switch (result) {
+                if (Data.Contains(gem))
+                {
+
+                    MessageBoxResult result = MessageBox.Show("Want to add it anyways?", "Gem alredy exists", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                    switch (result)
+                    {
 
 
-                    case MessageBoxResult.Yes:
-                        Data.Add(gem);
-                        gemgrid.DataContext = Data;
-                        break;
+                        case MessageBoxResult.Yes:
 
-                    case MessageBoxResult.No:
-                        /* ... */
-                        break;
+                            Data.Add(gem);
+                            gemgrid.DataContext = Data;
+                            break;
+
+                        case MessageBoxResult.No:
+                            /* ... */
+                            break;
+
+                    }
+                }
+                else
+                {
+
+                    Data.Add(gem);
+                    gemgrid.DataContext = Data;
+
+
+
+
+
+
+              
+
+                }
+
+                first.SelectedIndex = 0;
+                second.SelectedIndex = 0;
+                third.SelectedIndex = 0;
+                ability.SelectedIndex = 0;
+                type.SelectedIndex = 0;
+
+
+                lvl.Text = "0";
+                pr.Text = "0";
+                firstval.Text = "0";
+                secondval.Text = "0";
+                thirdval.Text = "0";
+            }
+                else {
+
+                MessageBox.Show("More than one stat are the same type", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+
+
+                
+            }
+
+
+            bool check_gem_type(EmpGem gem)
+
+            {
+
+                return gem.First.StatType == gem.Second.StatType || gem.Second.StatType == gem.Third.StatType || gem.First.StatType == gem.Third.StatType ;
                     
-                        }
-            }
-            else
-            {
-                Data.Add(gem);
-                gemgrid.DataContext = Data;
 
             }
-
-           
-
-
-            first.SelectedIndex = 0;
-            second.SelectedIndex = 0;
-            third.SelectedIndex = 0;
-            ability.SelectedIndex = 0;
-            type.SelectedIndex = 0;
-
-
-            lvl.Text = "0";
-            pr.Text = "0";
-            firstval.Text = "0";
-            secondval.Text = "0";
-            thirdval.Text = "0";
         }
     }
-}
