@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src-plugins"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="ij.jar"/>
+	<classpathentry kind="lib" path="jars/dmt2.jar"/>
+	<classpathentry kind="lib" path="jars/JTransforms-3.1-with-dependencies.jar"/>
+	<classpathentry kind="output" path="plugins"/>
+</classpath>

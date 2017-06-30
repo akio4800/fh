@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component inheritJdk="true">
+	<exclude-output/>
+	<contentEntry url="file://$MODULE_DIR$"/>
+	<lib name="ij.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/ij.jar!/"/>
+	</lib>
+	<lib name="dmt2.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/jars/dmt2.jar!/"/>
+	</lib>
+	<lib name="JTransforms-3.1-with-dependencies.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/jars/JTransforms-3.1-with-dependencies.jar!/"/>
+	</lib>
+</component>
