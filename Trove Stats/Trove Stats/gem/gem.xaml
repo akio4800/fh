@@ -1,0 +1,43 @@
+﻿<Page x:Class="Trove_Stats.gem.Gem"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Trove_Stats.gem"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="700"
+      Title="Gem" Background="Lavender">
+
+    <Grid Margin="0">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition/>
+            <RowDefinition />
+            <RowDefinition/>
+            <RowDefinition />
+            <RowDefinition/>
+            <RowDefinition />
+            <RowDefinition/>
+            <RowDefinition />
+            <RowDefinition/>
+            <RowDefinition />
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Label x:Name="gems" Content="Overview" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" MouseLeftButtonDown="Emp_MouseLeftButtonDown" Margin="10,10,10,0"/>
+        <Label x:Name="emp" Content="Empowered" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Grid.Column="1" MouseLeftButtonDown="Emp_MouseLeftButtonDown" Margin="10,10,10,0"/>
+        <Label x:Name="small" Content="Lesser" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Grid.Column="2" MouseLeftButtonDown="Small_MouseLeftButtonDown" Margin="10,10,10,0"/>
+        <Frame x:Name="frame" Grid.ColumnSpan="8" Content="Frame" Source="emp.xaml" Grid.Row="1" Grid.RowSpan="11"  NavigationUIVisibility="Hidden" />
+
+    </Grid>
+</Page>
