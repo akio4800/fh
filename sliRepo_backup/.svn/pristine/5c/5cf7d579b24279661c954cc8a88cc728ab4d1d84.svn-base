@@ -1,0 +1,15 @@
+﻿<Window x:Class="DB_TEST.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" Height="350" Width="525">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="149*"/>
+            <RowDefinition Height="171*"/>
+        </Grid.RowDefinitions>
+        <Button HorizontalAlignment="Left" Margin="144,2,0,0" VerticalAlignment="Top" Width="197" RenderTransformOrigin="0.509,0.086" Height="69" Grid.Row="1" Click="Button_Click" Content="Connect to Db" >
+            
+        </Button>
+
+    </Grid>
+</Window>

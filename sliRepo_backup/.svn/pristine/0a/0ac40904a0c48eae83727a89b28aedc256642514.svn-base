@@ -1,0 +1,64 @@
+﻿using SelvesSoftware.DataContainer;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SelvesSoftware
+{
+    /// <summary>
+    /// author: ZK
+    /// </summary>
+    public class Purchaser:Person
+    {
+        public Purchaser(Person person)
+        {
+            this.Id = person.Id;
+            this.EMail = person.EMail;
+            this.FirstName = person.FirstName;
+            this.LastName = person.LastName;
+            this.PhoneNumber = person.PhoneNumber;
+            this.HomeAdress = person.HomeAdress;
+            this.MobilePhone = person.MobilePhone;
+            
+
+        }
+
+        public Purchaser(){
+            HomeAdress = new Adress();
+        }
+        //Konstruktor mit Person
+        public bool Active {  get;  set; }
+        /// <summary>
+        /// Bewilligungszeitraum Beginn
+        /// </summary>
+        public DateTime? ApprovalBegin {   get;  set; }
+        /// <summary>
+        /// Bewilligungszeitraum Ende
+        /// </summary>
+        public DateTime? ApprovalEnd {   get;  set; }
+
+        /// <summary>
+        /// Eintrittdatum bei SLI
+        /// </summary>
+        public DateTime? EntryDate {   get;  set; }
+
+        /// <summary>
+        /// Kontaktperson des Auftraggebers
+        /// </summary>
+        public Person ContactPerson { get; set; }
+
+        public Boolean hasIntroCourse { get; set; }
+        public Boolean hasContract { get; set; }
+
+        public List<EmploymentStatus> Employees {get;  set;}
+
+        public String DistrictCommision { get; set; }
+
+        internal bool Empty()
+        {
+            throw new NotImplementedException();
+        }
+    }
+}

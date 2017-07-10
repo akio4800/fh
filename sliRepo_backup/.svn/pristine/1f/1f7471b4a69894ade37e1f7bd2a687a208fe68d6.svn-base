@@ -1,0 +1,406 @@
+﻿using Npgsql;
+using SelvesSoftware.DataContainer;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+
+namespace SelvesSoftware.DB
+{
+    public class MonthlyBillingDAO:IMonthlyBillingDAO
+    {
+        public List<MonthlyBilling> selectAllMB()
+        {
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+             
+
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "SELECT * FROM Monatsabrechnung ORDER BY agid,monat,jahr";
+
+            NpgsqlDataReader reader = command.ExecuteReader();
+
+            List<MonthlyBilling> mbs = new List<MonthlyBilling>();
+            MonthlyBilling mb = new MonthlyBilling();
+            mb.Mb = new List<MonthlyBillingPerPa>();
+            MonthlyBillingPerPa currmba = null;
+
+            while (reader.Read())
+            {
+                MonthlyBillingPerPa mbPerPA = new MonthlyBillingPerPa();
+
+                if (!(reader.IsDBNull(0)))
+                {
+                    mbPerPA.PrivateKm = reader.GetInt32(0);
+                }
+                if (!(reader.IsDBNull(1)))
+                {
+                    mbPerPA.Month = Convert.ToInt32(reader.GetDecimal(1));
+                    mb.Month = mbPerPA.Month;
+                }
+                if (!(reader.IsDBNull(2)))
+                {
+                    mbPerPA.Year = Convert.ToInt32(reader.GetDecimal(2));
+                    mb.Year = mbPerPA.Year;
+                }
+                if (!(reader.IsDBNull(3)))
+                {
+                    mbPerPA.Pa = new PersonalAssistant(reader.GetInt32(3));
+                }
+                if (!(reader.IsDBNull(4)))
+                {
+                    mbPerPA.Pur = new PurchaserData();
+                    mbPerPA.Pur.Purchaser = new Purchaser();
+                    mbPerPA.Pur.Purchaser.Id = reader.GetInt32(4);
+                    if (mb.Purchaser == null)
+                    {
+                        mb.Purchaser = new PurchaserData();
+                        mb.Purchaser.Purchaser = new Purchaser();
+                        mb.Purchaser.Purchaser.Id = mbPerPA.Pur.Purchaser.Id;
+                    }
+                }
+                if (!(reader.IsDBNull(5)))
+                {
+                    mbPerPA.WorkingHours = reader.GetInt32(5);
+                }
+                if (!(reader.IsDBNull(6)))
+                {
+                    mbPerPA.BillableKm = reader.GetInt32(6);
+                }
+                if (!(reader.IsDBNull(7)))
+                {
+                    mbPerPA.RehaFrom = reader.GetDateTime(7);
+                }
+                if (!(reader.IsDBNull(8)))
+                {
+                    mbPerPA.RehaTo = reader.GetDateTime(8);
+                }
+                if (currmba!= null && currmba.Month == mbPerPA.Month && currmba.Year == mbPerPA.Year && currmba.Pur.Purchaser.Id == mbPerPA.Pur.Purchaser.Id)
+                {
+                }
+                else if (currmba !=null)
+                {
+                    mbs.Add(mb);
+                    mb = new MonthlyBilling();
+                    mb.Mb = new List<MonthlyBillingPerPa>();
+                }
+                else
+                {
+                    currmba = mbPerPA;
+                }
+                mb.Mb.Add(mbPerPA);
+                currmba = mbPerPA;
+                
+            }
+            reader.Close();
+            con.Close();
+            return mbs;
+
+        }
+
+        public void selectMB(MonthlyBilling mb)
+        {
+            
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+
+             
+
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "SELECT * FROM Monatsabrechnung WHERE agid=@agid AND monat=@monat AND jahr=@jahr";
+
+            //adding Parameter to the command
+            DB.DBConnector.AddToCommand("@agid", NpgsqlTypes.NpgsqlDbType.Numeric, command, mb.Purchaser.Purchaser.Id);
+            DB.DBConnector.AddToCommand("@monat", NpgsqlTypes.NpgsqlDbType.Numeric, command, mb.Month);
+            DB.DBConnector.AddToCommand("@jahr", NpgsqlTypes.NpgsqlDbType.Numeric, command, mb.Year);
+
+            //using the Connection to get Datas
+            NpgsqlDataReader reader = command.ExecuteReader();
+            List<MonthlyBillingPerPa> mbList = new List<MonthlyBillingPerPa>();
+            while (reader.Read())
+            {
+                MonthlyBillingPerPa mbPerPA = new MonthlyBillingPerPa();
+                mbPerPA.Month = mb.Month;
+                mbPerPA.Year = mb.Year;
+                mbPerPA.Pur = mb.Purchaser;
+                if (!(reader.IsDBNull(0)))
+                {
+                    mbPerPA.PrivateKm = reader.GetInt32(0);
+                }
+                if (!(reader.IsDBNull(3)))
+                {
+                    mbPerPA.Pa = new PersonalAssistant(reader.GetInt32(0));
+                }
+                if (!(reader.IsDBNull(5)))
+                {
+                    mbPerPA.WorkingHours = reader.GetInt32(5);
+                }
+                if (!(reader.IsDBNull(6)))
+                {
+                    mbPerPA.BillableKm = reader.GetInt32(6);
+                }
+                if (!(reader.IsDBNull(7)))
+                {
+                    mbPerPA.RehaFrom = reader.GetDateTime(7);
+                }
+                if (!(reader.IsDBNull(8)))
+                {
+                    mbPerPA.RehaTo = reader.GetDateTime(8);
+                }
+                mbList.Add(mbPerPA);
+            }
+
+
+            reader.Close();
+            con.Close();
+            PersonalAssistantDAO paDao = new PersonalAssistantDAO();
+            foreach (MonthlyBillingPerPa entry in mbList)
+            {
+                entry.Pa = paDao.select(entry.Pa);
+            }
+
+            mb.Mb = mbList;
+            
+        }
+
+        public MonthlyBillingPerPa selectMBEntry(MonthlyBillingPerPa mb)
+        {
+
+            
+            
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+
+             
+
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "SELECT * FROM Monatsabrechnung p WHERE agid=@agid AND paid=@paid "+
+                                  "AND monat=@monat AND jahr=@jahr";
+
+            //adding Parameter to the command
+            DB.DBConnector.AddToCommand("@paid", NpgsqlTypes.NpgsqlDbType.Numeric, command, mb.Pa.Id);
+            DB.DBConnector.AddToCommand("@agid", NpgsqlTypes.NpgsqlDbType.Numeric, command, mb.Pur.Purchaser.Id);
+            DB.DBConnector.AddToCommand("@monat", NpgsqlTypes.NpgsqlDbType.Numeric, command, mb.Month);
+            DB.DBConnector.AddToCommand("@jahr", NpgsqlTypes.NpgsqlDbType.Numeric, command, mb.Year);
+
+            //using the Connection to get Datas
+            NpgsqlDataReader reader = command.ExecuteReader();
+
+            //creating a new Data Container and filling it
+            reader.Read();
+
+            if(!(reader.IsDBNull(0))){
+                mb.PrivateKm = reader.GetInt32(0);
+            }
+            if (!(reader.IsDBNull(5)))
+            {
+                mb.WorkingHours = reader.GetInt32(5);
+            }
+            if (!(reader.IsDBNull(6)))
+            {
+                mb.BillableKm = reader.GetInt32(6);
+            }
+            if (!(reader.IsDBNull(7)))
+            {
+                mb.RehaFrom = reader.GetDateTime(7);
+            }
+            if (!(reader.IsDBNull(8)))
+            {
+                mb.RehaTo = reader.GetDateTime(8);
+            }
+
+            reader.Close();
+            con.Close();
+
+            EffortEntryDAO eeDao = new EffortEntryDAO();
+            List<EffortEntry> entries = null;
+            entries = eeDao.GetEntries((int)mb.Pa.Id, (int)mb.Pur.Purchaser.Id, mb.Month, mb.Year);
+            mb.EffortList = entries;
+
+            return mb;
+            
+        }
+
+        public List<MonthlyBilling> SelectPeriod(DateTime from, DateTime to)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<MonthlyBilling> selectSpecificMB(MonthlyBilling mb)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<MonthlyBilling> selectSpecificMB(Purchaser pur)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<MonthlyBilling> selectAllMB(MonthlyBilling pur)
+        {
+            throw new NotImplementedException();
+        }
+
+        public MonthlyBilling InsertMonthlyBilling(MonthlyBilling mb)
+        {
+            //falsches Insert
+            return null;
+        }
+
+        public MonthlyBillingPerPa InsertMonthlyBilling(MonthlyBillingPerPa mb)
+        {
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+
+             
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "INSERT INTO monatsabrechnung (monat,jahr,agid,paid,anzahprivatlkm,stundenanzahl,"+
+                "anzahlkmabgerechnet,rehavon,rehabis) VALUES (@monat,@jahr,@agid,@paid,@anzahlprivatKm, "+
+                "@stundenanzahl,@anzahlKmabgerechnet,@Rehavon,@Rehabis)";
+
+            DB.DBConnector.AddToCommand("@paid", NpgsqlTypes.NpgsqlDbType.Integer, command, mb.Pa.Id);
+            DB.DBConnector.AddToCommand("@agid", NpgsqlTypes.NpgsqlDbType.Integer, command, mb.Pur.Purchaser.Id);
+            DB.DBConnector.AddToCommand("@jahr", NpgsqlTypes.NpgsqlDbType.Integer, command, mb.Year);
+            DB.DBConnector.AddToCommand("@monat", NpgsqlTypes.NpgsqlDbType.Integer, command, mb.Month);
+            DB.DBConnector.AddToCommand("@anzahlprivatKm", NpgsqlTypes.NpgsqlDbType.Integer, command,mb.PrivateKm );
+            DB.DBConnector.AddToCommand("@stundenanzahl", NpgsqlTypes.NpgsqlDbType.Integer, command, mb.WorkingHours);
+            DB.DBConnector.AddToCommand("@anzahlKmabgerechnet", NpgsqlTypes.NpgsqlDbType.Integer, command, mb.BillableKm);
+            DB.DBConnector.AddToCommand("@Rehavon", NpgsqlTypes.NpgsqlDbType.Date, command, mb.RehaFrom);
+            DB.DBConnector.AddToCommand("@Rehabis", NpgsqlTypes.NpgsqlDbType.Date, command, mb.RehaTo);
+
+            try {command.ExecuteNonQuery();}catch(Exception e){MessageBox.Show(e.Message.ToString(),"Error");}
+
+            con.Close();
+            return null;
+        }
+
+        public bool UpdateMonthlyBillingEntry(MonthlyBillingPerPa mb)
+        {
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+
+             
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "UPDATE Monatsabrechnung SET anzahprivatlkm=@privat,stundenanzahl=@stunde, "+
+                "anzahlkmabgerechnet=@kmabger, Rehavon=@rehavon, Rehabis=@rehabis WHERE agid=@agid AND paid=@paid " +
+                                  "AND monat=@monat AND jahr=@jahr";
+
+            DB.DBConnector.AddToCommand("@paid", NpgsqlTypes.NpgsqlDbType.Integer, command, mb.Pa.Id);
+            DB.DBConnector.AddToCommand("@agid", NpgsqlTypes.NpgsqlDbType.Integer, command, mb.Pur.Purchaser.Id);
+            DB.DBConnector.AddToCommand("@monat", NpgsqlTypes.NpgsqlDbType.Integer, command, mb.Month);
+            DB.DBConnector.AddToCommand("@jahr", NpgsqlTypes.NpgsqlDbType.Integer, command, mb.Year);
+            DB.DBConnector.AddToCommand("@privat", NpgsqlTypes.NpgsqlDbType.Integer, command, mb.PrivateKm);
+            DB.DBConnector.AddToCommand("@stunde", NpgsqlTypes.NpgsqlDbType.Integer, command, mb.WorkingHours);
+            DB.DBConnector.AddToCommand("@kmabger", NpgsqlTypes.NpgsqlDbType.Integer, command, mb.BillableKm);
+            DB.DBConnector.AddToCommand("@rehavon", NpgsqlTypes.NpgsqlDbType.Date, command, mb.RehaFrom);
+            DB.DBConnector.AddToCommand("@rehabis", NpgsqlTypes.NpgsqlDbType.Date, command, mb.RehaTo);
+
+            try {command.ExecuteNonQuery();}catch(Exception e){MessageBox.Show(e.Message.ToString(),"Error");}
+
+            con.Close();
+            return true;
+        }
+
+        public bool UpdateMonthlyBilling(MonthlyBilling mb)
+        {
+            //falsches update
+            throw new NotImplementedException();
+        }
+
+        public List<MonthlyBillingPerPa> SelectMBperPa(List<MonthlyBillingPerPa> mbppa)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        public List<MonthlyBilling> selectAllFrom(DateTime? nullable)
+        {
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+             
+            if (nullable == null) { nullable = new DateTime(2000, 01, 01); }; 
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "select * from monatsabrechnung where (monat >= @monat and jahr=@jahr) or jahr > @jahr ";
+
+            DB.DBConnector.AddToCommand("@monat", NpgsqlTypes.NpgsqlDbType.Numeric, command, nullable.Value.Month);
+            DB.DBConnector.AddToCommand("@jahr", NpgsqlTypes.NpgsqlDbType.Numeric, command, nullable.Value.Year);
+
+            NpgsqlDataReader reader = command.ExecuteReader();
+
+            List<MonthlyBilling> mbs = new List<MonthlyBilling>();
+            MonthlyBilling mb = new MonthlyBilling();
+            mb.Mb = new List<MonthlyBillingPerPa>();
+            MonthlyBillingPerPa currmba = null;
+
+            while (reader.Read())
+            {
+                MonthlyBillingPerPa mbPerPA = new MonthlyBillingPerPa();
+
+                if (!(reader.IsDBNull(0)))
+                {
+                    mbPerPA.PrivateKm = reader.GetInt32(0);
+                }
+                if (!(reader.IsDBNull(1)))
+                {
+                    mbPerPA.Month = Convert.ToInt32(reader.GetDecimal(1));
+                    mb.Month = mbPerPA.Month;
+                }
+                if (!(reader.IsDBNull(2)))
+                {
+                    mbPerPA.Year = Convert.ToInt32(reader.GetDecimal(2));
+                    mb.Year = mbPerPA.Year;
+                }
+                if (!(reader.IsDBNull(3)))
+                {
+                    mbPerPA.Pa = new PersonalAssistant(reader.GetInt32(3));
+                }
+                if (!(reader.IsDBNull(4)))
+                {
+                    mbPerPA.Pur = new PurchaserData();
+                    mbPerPA.Pur.Purchaser = new Purchaser();
+                    mbPerPA.Pur.Purchaser.Id = reader.GetInt32(4);
+                    if (mb.Purchaser == null)
+                    {
+                        mb.Purchaser = new PurchaserData();
+                        mb.Purchaser.Purchaser = new Purchaser();
+                        mb.Purchaser.Purchaser.Id = mbPerPA.Pur.Purchaser.Id;
+                    }
+                }
+                if (!(reader.IsDBNull(5)))
+                {
+                    mbPerPA.WorkingHours = reader.GetInt32(5);
+                }
+                if (!(reader.IsDBNull(6)))
+                {
+                    mbPerPA.BillableKm = reader.GetInt32(6);
+                }
+                if (!(reader.IsDBNull(7)))
+                {
+                    mbPerPA.RehaFrom = reader.GetDateTime(7);
+                }
+                if (!(reader.IsDBNull(8)))
+                {
+                    mbPerPA.RehaTo = reader.GetDateTime(8);
+                }
+                if (currmba != null && currmba.Month == mbPerPA.Month && currmba.Year == mbPerPA.Year && currmba.Pur.Purchaser.Id == mbPerPA.Pur.Purchaser.Id)
+                {
+                }
+                else if (currmba != null)
+                {
+                    mbs.Add(mb);
+                    mb = new MonthlyBilling();
+                    mb.Mb = new List<MonthlyBillingPerPa>();
+                }
+                else
+                {
+                    currmba = mbPerPA;
+                }
+                mb.Mb.Add(mbPerPA);
+                currmba = mbPerPA;
+
+            }
+            reader.Close();
+            con.Close();
+            return mbs;
+        }
+
+
+      
+    }
+}

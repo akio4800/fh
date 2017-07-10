@@ -1,0 +1,110 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+
+namespace SelvesSoftware
+{
+    /// <summary>
+    /// Interaktionslogik für MainNavigation.xaml
+    /// </summary>
+    public partial class MainNavigation : Page
+    {
+        public MainNavigation()
+        {
+            InitializeComponent();
+        }
+
+
+
+        private void AG_Übersicht_MouseEnter(object sender, MouseEventArgs e)
+        {
+            Brush br = new SolidColorBrush(Color.FromRgb(180, 180, 180));
+            AgÜbersicht.Background = br;
+        }
+
+        private void AG_Übersicht_MouseLeave(object sender, MouseEventArgs e)
+        {
+            Brush br = new SolidColorBrush(Color.FromArgb(0, 255, 255, 255));
+            AgÜbersicht.Background = br;
+        }
+
+
+
+        private void PA_Übersicht_MouseEnter(object sender, MouseEventArgs e)
+        {
+            Brush br = new SolidColorBrush(Color.FromRgb(180, 180, 180));
+            PaÜbersicht.Background = br;
+        }
+
+        private void PA_Übersicht_MouseLeave(object sender, MouseEventArgs e)
+        {
+            Brush br = new SolidColorBrush(Color.FromArgb(0, 255, 255, 255));
+           PaÜbersicht.Background = br;
+        }
+
+        private void PA_Übersicht_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (window.GetType() == typeof(Main))
+                {
+                    (window as Main).FrameÜbersicht.Source = new Uri("../Personenverwaltung/PA/PAÜbersicht.xaml",UriKind.Relative);
+                    (window as Main).FrameNavigation.Source = new Uri("../Personenverwaltung/PA/PASideNavigation.xaml", UriKind.Relative);
+
+                }
+            }
+        }
+        private void AG_Übersicht_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (window.GetType() == typeof(Main))
+                {
+                    (window as Main).FrameÜbersicht.Source = new Uri("../Personenverwaltung/AG/AGÜbersicht.xaml", UriKind.Relative);
+                    (window as Main).FrameNavigation.Source = new Uri("../Personenverwaltung/AG/AGSideNavigation.xaml", UriKind.Relative);
+
+                }
+            }
+        }
+
+     
+
+        private void MAÜbersicht_MouseEnter(object sender, MouseEventArgs e)
+        {
+            Brush br = new SolidColorBrush(Color.FromRgb(180, 180, 180));
+            MAÜbersicht.Background = br;
+        }
+
+        private void MAÜbersicht_MouseLeave(object sender, MouseEventArgs e)
+        {
+            Brush br = new SolidColorBrush(Color.FromArgb(0, 255, 255, 255));
+            MAÜbersicht.Background = br;
+        }
+
+        private void MAÜbersicht_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (window.GetType() == typeof(Main))
+                {
+                    (window as Main).FrameÜbersicht.Source = new Uri("../Monatsabrechnung/MABearbeiten.xaml", UriKind.Relative);
+                    (window as Main).FrameNavigation.Source = new Uri("../Monatsabrechnung/MASideNavigation.xaml", UriKind.Relative);
+
+                }
+            }
+        }
+
+
+    }
+}

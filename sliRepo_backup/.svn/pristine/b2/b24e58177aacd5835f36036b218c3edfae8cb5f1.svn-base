@@ -1,0 +1,4 @@
+server=193.170.192.130
+port=5432
+user id=postgres
+password=1234

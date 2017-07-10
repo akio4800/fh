@@ -1,0 +1,172 @@
+﻿using SelvesSoftware.BusinessLogic;
+using SelvesSoftware.DataContainer;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
+
+namespace SelvesSoftware.GUI.Personenverwaltung.PA.Windows
+{
+    /// <summary>
+    /// Interaction logic for AGAuswählen.xaml
+    /// </summary>
+    public partial class AGAuswählen : Window
+    {
+        private ObservableCollection<Track> Data = new ObservableCollection<Track>();
+        private List<PurchaserData> InputList;
+        List<Purchaser> availablePur = new List<Purchaser>();
+        private IPurchaserDataBl _bl;
+
+        public IPurchaserDataBl bl
+        {
+            get
+            {
+                if (_bl == null)
+                {
+                    _bl = new PurchaserDataBl();
+                }
+                return _bl;
+            }
+            set
+            {
+                _bl = value;
+            }
+        }
+
+        private class Track
+        {
+            private String _fn;
+            private String _lm;
+            private long _id;
+
+            public String FirstName
+            {
+                get { return _fn; }
+                set { _fn = value; }
+            }
+
+            public String LastName
+            {
+                get { return _lm; }
+                set { _lm = value; }
+            }
+            public long Id
+            {
+                get { return _id; }
+                set { _id = value; }
+            }
+        }
+
+        public int MainIndex { get; set; }
+        public int idx { get; set; }
+
+        private PaHinzufügen newPA;
+        private PaBearbeiten editPA;
+
+        public AGAuswählen(PaBearbeiten w)
+        {
+            editPA = w;
+            InitializeComponent();
+            setPurchaserOnGrid(editPA.employedPurchasers);
+        }
+
+        public AGAuswählen(PaHinzufügen w)
+        {
+            newPA = w;
+            InitializeComponent();
+            setPurchaserOnGrid(newPA.employedPurchasers);
+        }
+
+        private void setPurchaserOnGrid(List<Purchaser> employedPurchasers)
+        {
+            InputList = bl.SelectAllPurchaser();
+            for (int i = 0; i < InputList.Count; ++i)
+            {
+                if (InputList[i].Purchaser.Active)
+                {
+                    if (employedPurchasers == null)
+                    {
+                        Data.Add(new Track() { Id = InputList[i].Purchaser.Id, FirstName = InputList[i].Purchaser.FirstName, LastName = InputList[i].Purchaser.LastName });
+                    }
+                    else
+                    {
+                        bool purAlreadyIn = false;
+                        foreach (Purchaser pur in employedPurchasers)
+                        {
+                            if (pur.Id == InputList[i].Purchaser.Id)
+                            {
+                                purAlreadyIn = true;
+                            }
+                        }
+                        if (!purAlreadyIn)
+                        {
+                            Data.Add(new Track() { Id = InputList[i].Purchaser.Id, FirstName = InputList[i].Purchaser.FirstName, LastName = InputList[i].Purchaser.LastName });
+                            availablePur.Add(InputList[i].Purchaser);
+                        }
+                    }
+
+
+                }
+
+            }
+            GridÜbersicht.DataContext = Data;
+        }
+
+        public AGAuswählen()
+        {
+            InitializeComponent();
+           
+            InputList = bl.SelectAllPurchaser();
+            for (int i = 0; i < InputList.Count; ++i)
+            {
+                if (InputList[i].Purchaser.Active)
+                {
+                    // TODO only select those who are not already in the list
+                    Data.Add(new Track() { Id = InputList[i].Purchaser.Id, FirstName = InputList[i].Purchaser.FirstName, LastName = InputList[i].Purchaser.LastName });
+                    availablePur.Add(InputList[i].Purchaser);
+                }
+                
+            }
+            GridÜbersicht.DataContext = Data;
+        }
+
+        private void button_Click(object sender, RoutedEventArgs e)
+        {
+            //add connection and show purchaser in list
+            if (newPA != null)
+            {
+                newPA.employedPurchasers.Add(availablePur[MainIndex]);
+                newPA.AGListe.Items.Add(availablePur[MainIndex].FirstName + " " + availablePur[MainIndex].LastName);
+                
+            } else if (editPA != null)
+            {
+                editPA.employedPurchasers.Add(availablePur[MainIndex]);
+                editPA.AGListe.Items.Add(availablePur[MainIndex].FirstName + " " + availablePur[MainIndex].LastName);
+            }
+            
+            this.Close();
+        }
+
+        private void exit_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void GridÜbersicht_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var a = App.Current as App;
+            MainIndex = GridÜbersicht.SelectedIndex;
+            a.AGIndex = InputList[MainIndex].Purchaser.Id;
+        }
+    }
+}

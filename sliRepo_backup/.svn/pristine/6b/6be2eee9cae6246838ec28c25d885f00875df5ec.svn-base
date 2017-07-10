@@ -1,0 +1,90 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using SelvesSoftware.DataContainer;
+
+namespace SelvesSoftware
+{
+    /// <summary>
+    /// Zeigt alle Monatsabrechnungen eines Purchasers von allen PAs eines Monats
+    /// </summary>
+    public class MonthlyBilling
+    {
+        public int Year { get; set; }
+        public int Month { get; set; }
+        public PurchaserData Purchaser { get; set; }
+        public List<MonthlyBillingPerPa> Mb { get; set; }
+        public int SumKm { get; set; }
+        public decimal SumHours { get; set; }
+
+        /// <summary>
+        /// Beitrag aus Pflegegeld
+        /// </summary>
+        public decimal ContributionCareAllowance { get; set; }
+
+        /// <summary>
+        /// tatsächlich verbrauchte Stunden
+        /// </summary>
+        public decimal ConsumedHoursAmount { get; set; }
+
+        /// <summary>
+        /// Fahrtkosten
+        /// </summary>
+        public decimal TravelExpences { get; set; }
+
+        /// <summary>
+        /// Auszahlungsbetrag
+        /// </summary>
+        public decimal PayOut { get; set; }
+
+
+        /// <summary>
+        /// Abrechnungsbetrag
+        /// </summary>
+        public decimal PayOff { get; set; }
+
+
+        /// <summary>
+        /// tatsächlich ausbezahlter Betrag
+        /// </summary>
+        public decimal AmountActuallyPaid { get; set; }
+
+        /// <summary>
+        /// Differenz aus ausbezahltem und abgerechnetem Betrag
+        /// </summary>
+        public decimal Difference { get; set; }
+
+        /// <summary>
+        /// Differenz zum Vormonat
+        /// </summary>
+        public decimal DifferenceToPreviousMonth { get; set; }
+
+
+        /// <summary>
+        /// Stundenkontingent f. Bewilligungszeitraum 
+        /// </summary>
+        public decimal HourContingent { get; set; }
+
+        /// <summary>
+        /// bisher beanspruchte Stunden
+        /// </summary>
+        public decimal SoFarTookHours { get; set; }
+
+
+        /// <summary>
+        /// verbleibende Stunden bis Ende Bewilligungszeitraum
+        /// </summary>
+        public decimal RemainingHours { get; set; }
+
+        /// <summary>
+        /// aktuelles Stundenguthaben
+        /// </summary>
+        public decimal CurrentHourDeposit { get; set; }
+
+
+
+
+    }
+}

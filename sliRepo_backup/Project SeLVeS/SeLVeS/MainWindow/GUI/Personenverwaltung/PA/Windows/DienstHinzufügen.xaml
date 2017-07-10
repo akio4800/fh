@@ -1,0 +1,39 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"    
+    xmlns:el ="clr-namespace:SelvesSoftware.GUI.Elemente"
+     x:Class="SelvesSoftware.GUI.Personenverwaltung.PA.Windows.DienstHinzufügen"
+    
+        Title="Dienst hinzufügen"  ShowInTaskbar="False" Height="170" Width="300" MaxHeight="170" MinHeight="170" MinWidth="300" MaxWidth="300" WindowStartupLocation="CenterOwner">
+
+    <Grid >
+        <Border Background="AliceBlue"/>
+        <Grid >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+
+
+
+
+
+            </Grid.RowDefinitions>
+            <el:InputLabel  Content="Dienstbeginn:" Grid.Row="1"/>
+            <el:InputLabel Content="Dienstende:" Grid.Row="2" />
+            <DatePicker x:Name="Start" Grid.Row="1"   Grid.Column="1" Grid.ColumnSpan="2" VerticalContentAlignment="Center" Margin="5,0.5"/>
+            <DatePicker x:Name="End" Grid.Row="2"  Grid.Column="1" Grid.ColumnSpan="2" VerticalContentAlignment="Center" Margin="5,0.5"/>
+
+            <Button x:Name="OK" Content="OK"  Grid.Row="3"  Margin=" 30,23,70,7"  Grid.ColumnSpan="2" Grid.RowSpan="2" Click="OK_Click"/>
+            <Button x:Name="Reset" Content="Abbrechen" Margin="70,23,30,7"  Click="Reset_Click" Grid.Row="3" Grid.Column="1" Grid.RowSpan="2" Grid.ColumnSpan="2"/>
+            <el:InputLabel x:Name="notification" Content=""  Margin="0,0,0,0" Grid.Row="3"  Grid.ColumnSpan="3" HorizontalContentAlignment="Center"/>
+        </Grid>
+    </Grid>
+</Window>

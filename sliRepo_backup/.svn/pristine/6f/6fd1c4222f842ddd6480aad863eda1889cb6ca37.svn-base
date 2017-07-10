@@ -1,0 +1,55 @@
+﻿using SelvesSoftware.DataContainer;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SelvesSoftware.BusinessLogic
+{
+    public interface IPurchaserDataBl
+    {
+        /// <summary>
+        /// Abfrage eines AG mit einer bestimmten id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>alle Daten des AG</returns>
+        PurchaserData SelectPurchaser(int id);
+
+        PurchaserData Select(PurchaserData pur);
+
+        /// <summary>
+        /// Abrage aller AG
+        /// </summary>
+        /// <returns>Liste von AGs</returns>
+        List<PurchaserData> SelectAllPurchaser();
+
+        /// <summary>
+        /// Wählt einen AG mit bestimmten Parametern aus (für die Suche)
+        /// </summary>
+        /// <returns>Liste der AG</returns>
+        List<PurchaserData> SelectSpecificPurchaser();
+
+        /// <summary>
+        /// legt einen AG an
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns>true wenn es funktioniert hat sonst false</returns>
+        bool CreatePurchaser(PurchaserData p);
+
+        /// <summary>
+        /// Ruft ein update mit den neuen Daten des AG auf
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns>true oder false falls es fehlschlägt</returns>
+        bool UpdatePurchaser(PurchaserData p);
+
+        /// <summary>
+        /// legt ein neues Dienstverhältnis zwischen dem AG und PA an
+        /// </summary>
+        /// <param name="agId"></param>
+        /// <param name="paId"></param>
+        void addPAEmployment(long agId, long paId);
+        void changeGlobals(decimal stundensatz, decimal stundensatzAusz,  decimal fahrtkostenzusatzKM);
+    }
+}

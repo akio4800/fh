@@ -1,0 +1,15 @@
+﻿using SelvesSoftware.DataContainer;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+namespace SelvesSoftware.BusinessLogic
+{
+    public interface IPurchaserDataDAO
+    {
+        PurchaserData Insert(PurchaserData purData);
+        PurchaserData Select(PurchaserData pur);
+        List<PurchaserData> SelectAll();
+        bool Update(PurchaserData p);
+    }
+}

@@ -1,0 +1,306 @@
+﻿using SelvesSoftware.DataContainer;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SelvesSoftware.DB
+{
+    /// <summary>
+    /// author: TS
+    /// </summary>
+    
+    public class Test
+    {
+        
+        public static void TestPersonDao()
+        {
+            TestMonthlyBilling();
+            //TestPurchaser();
+            PersonalAssistant p = new PersonalAssistant();
+            PersonalAssistantDAO pDAO = new PersonalAssistantDAO();
+            p.FirstName = "testpersonDao";
+            p.LastName = "testpersonDao";
+            p.PhoneNumber = "9999";
+            p.MobilePhone = "99999";
+            p.EMail = "hans@gibts.net";
+            p.HomeAdress.City = "LINZ";
+            p.HomeAdress.Country = "schland";
+            p.HomeAdress.DoorNumber = 11115;
+            p.HomeAdress.StairNumber = 2345;
+            pDAO.insert(p);
+            pDAO.update(p);
+            pDAO.select(p);
+            pDAO.SelectAll();
+
+            PurchaserDAO purDAO = new PurchaserDAO();
+            Purchaser pur = new Purchaser();
+            pur.FirstName = "testpersonDao";
+            pur.LastName = "testpersonDao";
+            pur.PhoneNumber = "9999";
+            pur.MobilePhone = "99999";
+            pur.EMail = "hans@gibts.net";
+            pur.HomeAdress.City = "LINZ";
+            pur.HomeAdress.Country = "schland";
+            pur.HomeAdress.DoorNumber = 11115;
+            pur.HomeAdress.StairNumber = 2345;
+            purDAO.Insert(pur);
+            purDAO.Update(pur);
+            purDAO.Select(pur);
+            purDAO.SelectAll();
+
+            PurchaserData pd = new PurchaserData();
+            PurchaserDataDAO pdDao = new PurchaserDataDAO();
+            pd.AssistenceDemand = 20;
+            pd.CareAllowance = 1;
+            pd.CareAllowanceMaximum = 22;
+            pd.HourlyRate = 12;
+            pd.HourlyRatePayoff = 13;
+            pd.Income = 1000;
+            pd.InputIncome = 2000;
+            pd.Month = 2;
+            pd.Year = 2000;
+            pd.TravellingAllowance = 15;
+            pd.TravellingAllowanceKM = 25;
+            pd.Purchaser = pur;
+            pdDao.Insert(pd);
+            pdDao.Update(pd);
+            pdDao.Select(pd);
+            pdDao.SelectAll();
+
+            MonthlyBillingPerPa mb = new MonthlyBillingPerPa();
+            MonthlyBillingDAO mbDAO = new MonthlyBillingDAO();
+            mb.Pa = p;
+            mb.Pur = pd;
+            mb.WorkingHours = 20;
+            mb.PrivateKm = 20;
+            mb.EffortList = new List<EffortEntry>();
+            mb.Month = 2;
+            mb.Year = 2000;
+            mbDAO.InsertMonthlyBilling(mb);
+           // mbDAO.InsertMonthlyBilling(mb);
+            List<MonthlyBilling> mbs = mbDAO.selectAllMB();
+            mbDAO.UpdateMonthlyBillingEntry(mb);
+
+           // EffortEntry
+            EffortEntry ee = new EffortEntry();
+            ee.From = DateTime.Today;
+            ee.To = DateTime.Today;
+            ee.Month = 2;
+            ee.Year = 2000;
+            ee.Pa = new PersonalAssistant();
+            ee.Pa.Id = p.Id;
+            ee.Purchaser = new Purchaser();
+            ee.Purchaser.Id = pur.Id;
+            ee.A1 = new Activity();
+            ee.A1.Name = (Activity.State)1;
+            ee.A2 = new Activity();
+            ee.A2.Name = (Activity.State)2;
+
+            EffortEntryDAO eeDAO = new EffortEntryDAO();
+
+            eeDAO.InsertEntry(ee);
+            eeDAO.GetEntries(p.Id, pur.Id, ee.Month, ee.Year);
+            ee.A1.Name = (Activity.State)3;
+            eeDAO.UpdateEntry(ee);
+            PersonalAssistant pa = new PersonalAssistant();
+            pa.Id = 10;
+            List<EffortEntry> ees = eeDAO.GetEntriesByPa(pa, 2, 1999);
+            pur.Id = 199;
+            ees = eeDAO.GetEntriesByPurchaser(pur, 2, 1999);
+
+
+
+            //TestPurchaser();
+
+           /*// testPurchaser();
+            PurchaserDataDAO purdadao = new PurchaserDataDAO();
+            PurchaserData purda = new PurchaserData();
+            purda.purchaser.id = 998;
+            purda.month = 2;
+            purda.year = 2015;
+            purdadao.select(purda);
+
+
+            Purchaser pur = new Purchaser();
+            pur.id = 999;
+            PurchaserDAO purDao = new PurchaserDAO();
+            pur = purDao.select(pur);
+
+            
+            /*
+            Person p = new Person();
+            IPersonDAO Pdao = new PersonDAO();
+          
+            //test Insert
+            p.firstName = "testpersonDao";
+            p.lastName = "testpersonDao";
+            p.phoneNumber = 9999;
+            p.mobilePhone = 99999;
+            p.eMail = "hans@gibts.net";
+            p.homeAdress.city = "LINZ";
+            p.homeAdress.country = "schland";
+            p.homeAdress.doorNumber = 11115;
+            p.homeAdress.stairNumber = 2345;
+            Pdao.insert(p);
+
+            //test update
+            p.homeAdress.city = "WIEN";
+            p.homeAdress.street = "updatestraße";
+            p.firstName = "updateName";
+            p.eMail = "updateEmail";
+            Pdao.update(p);
+
+
+
+            Person p2 = new Person();
+            p2.id = p.id;
+           
+            //test select
+            Pdao.select(p);
+            Console.WriteLine(p.firstName);
+            Console.WriteLine(p.homeAdress.city);
+            */
+            //test pdao
+           /* PersonalAssistant p = new PersonalAssistant();
+            PersonalAssistantDAO Pdao = new PersonalAssistantDAO();
+            
+
+            
+            //test Insert
+            p.firstName = "Susanne";
+            p.lastName = "Ludwig";
+            p.phoneNumber = 9999;
+            p.mobilePhone = 99999;
+            p.eMail = "susanne.ludwig@gibts.net";
+            p.homeAdress.city = "Wartberg";
+            //p.ClosingDateDocuments = new DateTime(1999, 12, 12);
+            Pdao.insert(p);
+
+            /*
+            p.firstName = "paHans";
+            p.lastName = "paMeinzl";
+            p.homeAdress.city = "paWien";
+            p.active = true;
+            p.ClosingDateDocuments = DateTime.Today;
+            Pdao.insert(p);
+            p.homeAdress.city = "paUpdateLinz";
+
+            Pdao.update(p);
+            Pdao.select(p);
+            
+            Console.Write(Pdao.SelectAll().ElementAt(0).lastName);
+            */
+
+            
+
+
+
+
+        }
+        
+        public static void TestMonthlyBilling()
+        {
+            List<PurchaserData> pds = (new PurchaserDataDAO()).SelectAll();
+            PurchaserData pData = new PurchaserData();
+            pData.Purchaser = new Purchaser();
+            pData.Purchaser.Id = 998;
+          //  pData.Month = 4;
+           // pData.Year = 2013;
+
+            pData = (new PurchaserDataDAO()).Select(pData);
+
+            PersonalAssistant pa = new PersonalAssistant(996);
+            pa = (new PersonalAssistantDAO()).select(pa);
+
+            MonthlyBillingPerPa mbPerPa = new MonthlyBillingPerPa();
+            mbPerPa.Pur = pData;
+            mbPerPa.Pa = pa;
+            mbPerPa.Month = 2;
+            mbPerPa.Year = 2015;
+            mbPerPa = (new MonthlyBillingDAO()).selectMBEntry(mbPerPa);
+        }
+        /*
+        public static void TestPurchaser()
+        {
+            Purchaser p = new Purchaser();
+            PurchaserDAO pdao = new PurchaserDAO();
+
+            //test Insert
+            p.FirstName = "testpersonDao";
+            p.LastName = "testpersonDao";
+            p.PhoneNumber = 9999;
+            p.MobilePhone = 99999;
+            p.EMail = "hans@gibts.net";
+            p.HomeAdress.City = "LINZ";
+            p.HomeAdress.Country = "schland";
+            p.HomeAdress.DoorNumber = 11115;
+            p.HomeAdress.StairNumber = 2345;
+            pdao.Insert(p);
+
+            PurchaserData d = new PurchaserData();
+            d.Purchaser = p;
+            d.AssistenceDemand = 12;
+            d.CareAllowance = 13;
+            d.HourlyRate = 30;
+            d.HourlyRatePayoff = 20;
+            d.Income = 29;
+            d.InputIncome = 100;
+            d.Month = 11;
+            d.TravellingAllowance = 12;
+            d.TravellingAllowanceKM = 11;
+            d.Year = 2015;
+            PurchaserDataDAO pdDao = new PurchaserDataDAO();
+            pdDao.Insert(d);
+
+            d.Income = 350;
+            pdDao.Update(d);
+
+
+        }
+         * */
+
+        static void Test2()
+        {
+            PersonalAssistantDAO pdao = new PersonalAssistantDAO();
+            PersonalAssistant pa = new PersonalAssistant();
+
+            pa.Id = 991;
+
+
+        }
+
+        public static void TestAdressDao()
+        {
+         /*   Adress a = new Adress();
+            IAdressDAO Adao = new AdressDAO();
+            //test Insert @street, @houseNumber, @doorNumber, @stairNumber, @zipCode, @city, @country) WHERE adressId =@adressId";
+            a.street        = "Karl-Steiger-Strasse";
+            a.houseNumber   = 11;
+            a.doorNumber    = 2;
+            a.stairNumber   = 0;
+            a.zipCode       = 4030;
+            a.city          = "Linz";
+            a.country       = "Austria";
+            Adao.insert(a);
+
+            //test update
+            Adao.update(a);*/
+            PersonalAssistant p = new PersonalAssistant();
+            PersonalAssistantDAO pdao = new PersonalAssistantDAO();
+
+            //test Insert
+            p.FirstName = "Susanne";
+            p.LastName = "Ludwig";
+            p.PhoneNumber = "9999";
+            p.MobilePhone = "99999";
+            p.EMail = "susanne.ludwig@gibts.net";
+            p.HomeAdress.City = "Wartberg";
+            pdao.insert(p);
+
+
+        }
+
+    }
+}

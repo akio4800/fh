@@ -1,0 +1,152 @@
+﻿using Npgsql;
+using System;
+using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+
+namespace SelvesSoftware.DB
+{
+
+    //-----------------------------------------------------------------------------------------------------
+    /// <summary>
+    /// author: TS
+    /// </summary>
+    public class AdressDAO : IAdressDAO
+    {
+        //-----------------------------------------------------------------------------------------------------
+        public Adress Select(Adress a)
+        {
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+            
+             
+
+            NpgsqlCommand cmd = new NpgsqlCommand(null, con);
+            cmd.CommandText = "SELECT * FROM Adresse where adressId=@id";
+
+            NpgsqlParameter id = new NpgsqlParameter("@id", NpgsqlTypes.NpgsqlDbType.Numeric);
+            id.Value = a.AdressId;
+            cmd.Parameters.Add(id);
+
+            NpgsqlDataReader reader = cmd.ExecuteReader();
+            reader.Read();
+            Adress ad = new Adress();
+            if (reader.HasRows)
+            {
+                if (!(reader.IsDBNull(0)))
+                {
+                    ad.AdressId = long.Parse(reader[0].ToString());
+                }
+                if (!(reader.IsDBNull(1)))
+                {
+                    ad.Street = reader[1].ToString();
+                }
+                if (!(reader.IsDBNull(2)))
+                {
+                    ad.City = reader.GetString(2);
+                }
+                if (!(reader.IsDBNull(3)))
+                {
+                    ad.Country = reader.GetString(3);
+                }
+                if (!(reader.IsDBNull(4)))
+                {
+                    ad.HouseNumber = reader.GetInt32(4);
+                }
+                if (!(reader.IsDBNull(5)))
+                {
+                    ad.StairNumber = reader.GetInt32(5);
+                }
+                if (!(reader.IsDBNull(6)))
+                {
+                    // stock fehlt  ad. = reader[6].ToString();
+                }
+                if (!(reader.IsDBNull(7)))
+                {
+                    ad.ZipCode = reader.GetInt32(7);
+                }
+                if (!(reader.IsDBNull(8)))
+                {
+                    ad.DoorNumber = reader.GetInt32(8);
+                }
+            }
+            reader.Close();
+            con.Close();
+
+            return ad;
+            
+   
+        }
+
+        //-----------------------------------------------------------------------------------------------------
+        public void Update(Adress a)
+        {
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+             
+            NpgsqlCommand cmd = new NpgsqlCommand(null, con);
+
+            cmd.CommandText = "UPDATE Adresse SET strasse=@street, hausnummer=@houseNumber, tuer=@doorNumber, stiege=@stairNumber, plz=@zipCode, stadt=@city, land=@country, stock=@etage WHERE adressId=@adressId";
+
+            DB.DBConnector.AddToCommand("@street", NpgsqlTypes.NpgsqlDbType.Varchar, cmd, a.Street);
+            DB.DBConnector.AddToCommand("@city", NpgsqlTypes.NpgsqlDbType.Varchar, cmd, a.City);
+            DB.DBConnector.AddToCommand("@houseNumber", NpgsqlTypes.NpgsqlDbType.Numeric, cmd, a.HouseNumber);
+            DB.DBConnector.AddToCommand("@stairNumber", NpgsqlTypes.NpgsqlDbType.Numeric, cmd, a.StairNumber);
+            DB.DBConnector.AddToCommand("@doorNumber", NpgsqlTypes.NpgsqlDbType.Numeric, cmd, a.DoorNumber);
+            DB.DBConnector.AddToCommand("@zipCode", NpgsqlTypes.NpgsqlDbType.Numeric, cmd, a.ZipCode);
+            DB.DBConnector.AddToCommand("@adressid", NpgsqlTypes.NpgsqlDbType.Numeric, cmd, a.AdressId);
+            DB.DBConnector.AddToCommand("@country", NpgsqlTypes.NpgsqlDbType.Varchar, cmd, a.Country);
+            DB.DBConnector.AddToCommand("@etage", NpgsqlTypes.NpgsqlDbType.Numeric, cmd, a.Etage);
+            try {
+                cmd.ExecuteNonQuery();
+            }catch(Exception e)
+            {
+                MessageBox.Show(e.Message.ToString(),"Error");
+            }
+            con.Close();
+
+        }
+        //-----------------------------------------------------------------------------------------------------
+        public Adress Insert(Adress a)
+        {
+
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+
+            
+            NpgsqlCommand cmd = new NpgsqlCommand(null, con);
+
+            //getting next id from the Sequence
+            cmd.CommandText = "Select nextval('AddressIdGen')";
+            try { NpgsqlDataReader reader = cmd.ExecuteReader();
+                reader.Read();
+                a.AdressId = reader.GetInt64(0);
+                reader.Close();
+
+                cmd.CommandText = "INSERT INTO Adresse  VALUES (@adressid,@street, @city, @country, @houseNumber, @stairNumber, @etage , @zipCode, @doorNumber)";
+
+                DB.DBConnector.AddToCommand("@street", NpgsqlTypes.NpgsqlDbType.Varchar, cmd, a.Street);
+                DB.DBConnector.AddToCommand("@city", NpgsqlTypes.NpgsqlDbType.Varchar, cmd, a.City);
+                DB.DBConnector.AddToCommand("@houseNumber", NpgsqlTypes.NpgsqlDbType.Numeric, cmd, a.HouseNumber);
+                DB.DBConnector.AddToCommand("@stairNumber", NpgsqlTypes.NpgsqlDbType.Numeric, cmd, a.StairNumber);
+                DB.DBConnector.AddToCommand("@doorNumber", NpgsqlTypes.NpgsqlDbType.Numeric, cmd, a.DoorNumber);
+                DB.DBConnector.AddToCommand("@zipCode", NpgsqlTypes.NpgsqlDbType.Numeric, cmd, a.ZipCode);
+                DB.DBConnector.AddToCommand("@adressid", NpgsqlTypes.NpgsqlDbType.Numeric, cmd, a.AdressId);
+                DB.DBConnector.AddToCommand("@country", NpgsqlTypes.NpgsqlDbType.Varchar, cmd, a.Country);
+                DB.DBConnector.AddToCommand("@etage", NpgsqlTypes.NpgsqlDbType.Numeric, cmd, a.Etage);
+
+                try { cmd.ExecuteNonQuery(); } catch (Exception e) { MessageBox.Show(e.Message.ToString(), "Error"); }
+            }catch(Exception e)
+            {
+                MessageBox.Show(e.Message.ToString(), "Error");
+            }
+
+            con.Close();
+
+            return a;
+
+        }
+    }
+}
+
+

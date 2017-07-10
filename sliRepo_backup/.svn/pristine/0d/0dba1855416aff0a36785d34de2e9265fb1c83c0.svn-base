@@ -1,0 +1,391 @@
+﻿using Npgsql;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+
+namespace SelvesSoftware.DB
+{
+    //-----------------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Leistungseintrag eines PA
+    /// </summary>
+    public class EffortEntryDAO: IEffortEntryDAO
+    {
+        //-----------------------------------------------------------------------------------------------------
+
+        public EffortEntry GetEntry(EffortEntry ee){
+            return null;
+        }
+
+        public void UpdateEntry(EffortEntry ee)
+        {
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+             
+
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "UPDATE leistungseintrag SET paId=@paId, agId=@agId, monat=@monat, jahr=@jahr,von=@von, bis=@bis, tag=@tag, abrechenbareKm=@abrechenbareKm, taetigkeit1=@taetigkeit1, taetigkeit2=@taetigkeit2, taetigkeit3=@taetigkeit3 "+ 
+                "WHERE eintragId=@eintragId";
+
+
+            DB.DBConnector.AddToCommand("@paId", NpgsqlTypes.NpgsqlDbType.Numeric, command, ee.Pa.Id);
+            DB.DBConnector.AddToCommand("@agId", NpgsqlTypes.NpgsqlDbType.Numeric, command, ee.Purchaser.Id);
+            DB.DBConnector.AddToCommand("@monat", NpgsqlTypes.NpgsqlDbType.Numeric, command, ee.Month);
+            DB.DBConnector.AddToCommand("@jahr", NpgsqlTypes.NpgsqlDbType.Numeric, command, ee.Year);
+
+            DB.DBConnector.AddToCommand("@eintragId", NpgsqlTypes.NpgsqlDbType.Numeric, command, ee.Id);
+            DB.DBConnector.AddToCommand("@von", NpgsqlTypes.NpgsqlDbType.Varchar, command, ee.From.Hour + ":" + ee.From.Minute);
+            DB.DBConnector.AddToCommand("@bis", NpgsqlTypes.NpgsqlDbType.Varchar, command, ee.To.Hour + ":" + ee.To.Minute);
+            DB.DBConnector.AddToCommand("@tag", NpgsqlTypes.NpgsqlDbType.Numeric, command, ee.Day);
+            DB.DBConnector.AddToCommand("@abrechenbareKm", NpgsqlTypes.NpgsqlDbType.Numeric, command, ee.Km);
+
+
+            DB.DBConnector.AddToCommand("@taetigkeit1", NpgsqlTypes.NpgsqlDbType.Numeric, command, ee.A1.ActivityId);
+            if (ee.A2 != null)
+            {
+                DB.DBConnector.AddToCommand("@taetigkeit2", NpgsqlTypes.NpgsqlDbType.Numeric, command, ee.A2.ActivityId);
+            }
+            else
+            {
+                DB.DBConnector.AddToCommand("@taetigkeit2", NpgsqlTypes.NpgsqlDbType.Numeric, command, null);
+            }
+            if (ee.A3 != null)
+            {
+                DB.DBConnector.AddToCommand("@taetigkeit3", NpgsqlTypes.NpgsqlDbType.Numeric, command, ee.A3.ActivityId);
+            }
+            else
+            {
+                DB.DBConnector.AddToCommand("@taetigkeit3", NpgsqlTypes.NpgsqlDbType.Numeric, command, null);
+            }
+            
+            try {command.ExecuteNonQuery();}catch(Exception e){MessageBox.Show(e.Message.ToString(),"Error");}
+            con.Close();
+        }
+
+        //-----------------------------------------------------------------------------------------------------
+        public List<EffortEntry> GetEntries(long paid,long agid,int month,int year)
+        {
+            PurchaserDAO agDao = new PurchaserDAO();
+            PersonalAssistantDAO paDao = new PersonalAssistantDAO();
+           
+                NpgsqlConnection con = DB.DBConnector.GetConnection();
+                NpgsqlCommand command = new NpgsqlCommand(null, con);
+                     
+     
+
+                    command.CommandText = "SELECT eintragId,von,bis,tag,abrechenbareKm,taetigkeit1,taetigkeit2,taetigkeit3,paId From leistungseintrag WHERE paId=@paId AND monat=@monat AND jahr=@jahr AND agId=@agId";
+
+
+                    DB.DBConnector.AddToCommand("@paId", NpgsqlTypes.NpgsqlDbType.Numeric, command, paid);
+                    DB.DBConnector.AddToCommand("@monat", NpgsqlTypes.NpgsqlDbType.Numeric, command, month);
+                    DB.DBConnector.AddToCommand("@jahr", NpgsqlTypes.NpgsqlDbType.Numeric, command, year);
+                    DB.DBConnector.AddToCommand("@agId", NpgsqlTypes.NpgsqlDbType.Numeric, command, agid);
+                    
+                    //using the Connection to get Datas
+                    NpgsqlDataReader reader = command.ExecuteReader();
+
+                    //creating a new Data Container and filling it
+                    List<EffortEntry> ees = new List<EffortEntry>();
+                    while (reader.Read())
+                    {
+                        EffortEntry ee = new EffortEntry();
+                        FillEffortEntry(ee, reader);
+                        ees.Add(ee);
+                    }
+
+                    reader.Close();
+                    con.Close();
+
+                    foreach (EffortEntry ee in ees)
+                    {
+                        if (ee.Purchaser != null)
+                        {
+                            agDao.Select(ee.Purchaser);
+                        }
+                        if (ee.Pa != null)
+                        {
+                            paDao.select(ee.Pa);
+                        }
+                    }
+
+                    return ees;
+            
+        }
+
+        //-----------------------------------------------------------------------------------------------------
+        public void InsertEntry(EffortEntry ee)
+        {
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+             
+            
+
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "Select nextval('eintragIdgen')";
+            NpgsqlDataReader reader = command.ExecuteReader();
+            reader.Read();
+            ee.Id = (int)reader.GetInt64(0);
+            reader.Close();
+
+
+            command = new NpgsqlCommand(null, con);
+            command.CommandText = "INSERT INTO leistungseintrag (paId, agId, monat, jahr, eintragId, von, bis, tag, abrechenbareKm, taetigkeit1, taetigkeit2, taetigkeit3) "+ 
+                "VALUES (@paId, @agId, @monat, @jahr, @eintragId, @von, @bis, @tag, @abrechenbareKm, @taetigkeit1, @taetigkeit2, @taetigkeit3)";
+
+            DB.DBConnector.AddToCommand("@paId", NpgsqlTypes.NpgsqlDbType.Numeric, command, ee.Pa.Id);
+            DB.DBConnector.AddToCommand("@agId", NpgsqlTypes.NpgsqlDbType.Numeric, command, ee.Purchaser.Id);
+            DB.DBConnector.AddToCommand("@monat", NpgsqlTypes.NpgsqlDbType.Numeric, command, ee.Month);
+            DB.DBConnector.AddToCommand("@jahr", NpgsqlTypes.NpgsqlDbType.Numeric, command, ee.Year);
+
+            DB.DBConnector.AddToCommand("@eintragId", NpgsqlTypes.NpgsqlDbType.Numeric, command, ee.Id);
+            DB.DBConnector.AddToCommand("@von", NpgsqlTypes.NpgsqlDbType.Varchar, command, ee.From.Hour +":" +ee.From.Minute);
+            DB.DBConnector.AddToCommand("@bis", NpgsqlTypes.NpgsqlDbType.Varchar, command, ee.To.Hour + ":" + ee.To.Minute);
+            DB.DBConnector.AddToCommand("@tag", NpgsqlTypes.NpgsqlDbType.Numeric, command, ee.Day);
+            DB.DBConnector.AddToCommand("@abrechenbareKm", NpgsqlTypes.NpgsqlDbType.Numeric, command, ee.Km);
+
+            
+            DB.DBConnector.AddToCommand("@taetigkeit1", NpgsqlTypes.NpgsqlDbType.Numeric, command, ee.A1.ActivityId);
+            if (ee.A2 != null)
+            {
+                DB.DBConnector.AddToCommand("@taetigkeit2", NpgsqlTypes.NpgsqlDbType.Numeric, command, ee.A2.ActivityId);
+            }
+            else
+            {
+                DB.DBConnector.AddToCommand("@taetigkeit2", NpgsqlTypes.NpgsqlDbType.Numeric, command, null);
+            }
+            if (ee.A3 != null)
+            {
+                DB.DBConnector.AddToCommand("@taetigkeit3", NpgsqlTypes.NpgsqlDbType.Numeric, command, ee.A3.ActivityId);
+            }
+            else
+            {
+                DB.DBConnector.AddToCommand("@taetigkeit3", NpgsqlTypes.NpgsqlDbType.Numeric, command, null);
+            }
+            
+            try {command.ExecuteNonQuery();}catch(Exception e){MessageBox.Show(e.Message.ToString(),"Error");}
+            con.Close();
+        }
+
+        public void FillEffortEntry(EffortEntry ee, NpgsqlDataReader reader)
+        {
+
+                if (!reader.IsDBNull(0))
+                {
+                    ee.Id = reader.GetInt32(0);
+                }
+                if (!reader.IsDBNull(1))
+                {
+                    String timeString = reader.GetString(1);
+                    String[] times = timeString.Split(':');
+                    ee.From = new DateTime(2000, 1, 1, int.Parse(times[0]), int.Parse(times[1]), 0);
+                }
+                if (!reader.IsDBNull(2))
+                {
+                    String timeString = reader.GetString(2);
+                    String[] times = timeString.Split(':');
+                    ee.To = new DateTime(2000, 1, 1, int.Parse(times[0]), int.Parse(times[1]), 0);
+
+                }
+                if (!(reader.IsDBNull(3)))
+                {
+                    ee.Day = reader.GetInt32(3);
+                }
+                if (!(reader.IsDBNull(4)))
+                {
+                    ee.Km = reader.GetInt32(4);
+                }
+                if (!(reader.IsDBNull(5)))
+                {
+                    ee.A1 = new Activity();
+                    ee.A1.ActivityId = reader.GetInt32(5);
+                }
+                if (!(reader.IsDBNull(6)))
+                {
+                    ee.A2 = new Activity();
+                    ee.A2.ActivityId = reader.GetInt32(6);
+                }
+                if (!(reader.IsDBNull(7)))
+                {
+                    ee.A3 = new Activity();
+                    ee.A3.ActivityId = reader.GetInt32(7);
+                }
+
+                if (!reader.IsDBNull(8))
+                {
+                    ee.Purchaser = new Purchaser();
+                    ee.Purchaser.Id = reader.GetInt32(8);
+                }
+               
+            
+        }
+
+        internal List<EffortEntry> GetEntriesByPa(PersonalAssistant pa, int month, int year)
+        {
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+             
+
+            PurchaserDAO pDao = new PurchaserDAO();
+
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "SELECT eintragId,von,bis,tag,abrechenbareKm,taetigkeit1,taetigkeit2,taetigkeit3,agid From leistungseintrag WHERE paId=@paId AND monat=@monat AND jahr=@jahr";
+
+            DB.DBConnector.AddToCommand("@paId", NpgsqlTypes.NpgsqlDbType.Numeric, command, pa.Id);
+            DB.DBConnector.AddToCommand("@monat", NpgsqlTypes.NpgsqlDbType.Numeric, command, month);
+            DB.DBConnector.AddToCommand("@jahr", NpgsqlTypes.NpgsqlDbType.Numeric, command, year);
+
+            NpgsqlDataReader reader = command.ExecuteReader();
+
+            List<EffortEntry> ees = new List<EffortEntry>();
+
+            while (reader.Read())
+            {
+                EffortEntry ee = new EffortEntry();
+                ee.Pa = pa;
+                ee.Purchaser = new Purchaser();
+
+                if (!reader.IsDBNull(0))
+                {
+                    ee.Id = reader.GetInt32(0);
+                }
+                if (!reader.IsDBNull(1))
+                {
+                    String timeString = reader.GetString(1);
+                    String[] times = timeString.Split(':');
+                    ee.From = new DateTime(2000, 1, 1, int.Parse(times[0]), int.Parse(times[1]), 0);
+                }
+                if (!reader.IsDBNull(2))
+                {
+                    String timeString = reader.GetString(2);
+                    String[] times = timeString.Split(':');
+                    ee.To = new DateTime(2000, 1, 1, int.Parse(times[0]), int.Parse(times[1]), 0);
+
+                }
+                if (!(reader.IsDBNull(3)))
+                {
+                    ee.Day = reader.GetInt32(3);
+                }
+                if (!(reader.IsDBNull(4)))
+                {
+                    ee.Km = reader.GetInt32(4);
+                }
+                if (!(reader.IsDBNull(5)))
+                {
+                    ee.A1 = new Activity();
+                    ee.A1.ActivityId = reader.GetInt32(5);
+                }
+                if (!(reader.IsDBNull(6)))
+                {
+                    ee.A2 = new Activity();
+                    ee.A2.ActivityId = reader.GetInt32(6);
+                }
+                if (!(reader.IsDBNull(7)))
+                {
+                    ee.A3 = new Activity();
+                    ee.A3.ActivityId = reader.GetInt32(7);
+                }
+                if (!reader.IsDBNull(8))
+                {
+                    ee.Purchaser.Id = reader.GetInt32(8);
+                }
+            }
+            con.Close();
+
+            foreach(EffortEntry ee in ees){
+                if (ee.Pa != null)
+                {
+                    pDao.Select(ee.Purchaser);
+                }
+            }
+
+            return ees;
+        }
+
+        internal List<EffortEntry> GetEntriesByPurchaser(Purchaser p, int month, int year)
+        {
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+             
+
+            PersonalAssistantDAO pDao = new PersonalAssistantDAO();
+
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "SELECT eintragId,von,bis,tag,abrechenbareKm,taetigkeit1,taetigkeit2,taetigkeit3,paid From leistungseintrag WHERE agId=@agId AND monat=@monat AND jahr=@jahr";
+
+            DB.DBConnector.AddToCommand("@agId", NpgsqlTypes.NpgsqlDbType.Numeric, command, p.Id);
+            DB.DBConnector.AddToCommand("@monat", NpgsqlTypes.NpgsqlDbType.Numeric, command, month);
+            DB.DBConnector.AddToCommand("@jahr", NpgsqlTypes.NpgsqlDbType.Numeric, command, year);
+
+            NpgsqlDataReader reader = command.ExecuteReader();
+
+            List<EffortEntry> ees = new List<EffortEntry>();
+
+            while (reader.Read())
+            {
+                EffortEntry ee = new EffortEntry();
+                ee.Pa = new PersonalAssistant();
+                ee.Purchaser = p;
+
+                if (!reader.IsDBNull(0))
+                {
+                    ee.Id = reader.GetInt32(0);
+                }
+                if (!reader.IsDBNull(1))
+                {
+                    String timeString = reader.GetString(1);
+                    String[] times = timeString.Split(':');
+                    ee.From = new DateTime(2000, 1, 1, int.Parse(times[0]), int.Parse(times[1]), 0);
+                }
+                if (!reader.IsDBNull(2))
+                {
+                    String timeString = reader.GetString(2);
+                    String[] times = timeString.Split(':');
+                    ee.To = new DateTime(2000, 1, 1, int.Parse(times[0]), int.Parse(times[1]), 0);
+
+                }
+                if (!(reader.IsDBNull(3)))
+                {
+                    ee.Day = reader.GetInt32(3);
+                }
+                if (!(reader.IsDBNull(4)))
+                {
+                    ee.Km = reader.GetInt32(4);
+                }
+                if (!(reader.IsDBNull(5)))
+                {
+                    ee.A1 = new Activity();
+                    ee.A1.ActivityId = reader.GetInt32(5);
+                }
+                if (!(reader.IsDBNull(6)))
+                {
+                    ee.A2 = new Activity();
+                    ee.A2.ActivityId = reader.GetInt32(6);
+                }
+                if (!(reader.IsDBNull(7)))
+                {
+                    ee.A3 = new Activity();
+                    ee.A3.ActivityId = reader.GetInt32(7);
+                }
+                if (!reader.IsDBNull(8))
+                {
+                    ee.Pa.Id = reader.GetInt32(8);
+                }
+            }
+            con.Close();
+
+            foreach (EffortEntry ee in ees)
+            {
+                pDao.select(ee.Pa);
+            }
+
+            return ees;
+        }
+
+        //possibly not needed
+        internal EffortEntry GetEntry(PersonalAssistant pa, int month, int year, int Day)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}
+
+

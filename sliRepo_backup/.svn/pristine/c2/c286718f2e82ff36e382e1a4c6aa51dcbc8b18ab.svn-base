@@ -1,0 +1,65 @@
+﻿using SelvesSoftware.DB;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SelvesSoftware.BusinessLogic
+{
+
+   
+    public class EffortEntryBl:IEffortEntry
+    {
+
+        private IEffortEntryDAO _eeDao;
+        public IEffortEntryDAO EeDao
+        {
+            get
+            {
+                if (_eeDao == null)
+                {
+                    _eeDao = new EffortEntryDAO();
+                }
+                return _eeDao;
+            }
+            set
+            {
+                _eeDao = value;
+            }
+
+        }
+        public void DoEffortEntry(EffortEntry e)
+        {
+           EffortEntryDAO eDao = new EffortEntryDAO();
+            eDao.InsertEntry(e);
+        }
+
+        public List<EffortEntry> GetEntriesByPa(PersonalAssistant pa, int month, int year)
+        {
+            EffortEntryDAO eDao = new EffortEntryDAO();
+            List<EffortEntry> entry = eDao.GetEntriesByPa(pa,month,year);
+            return null;
+        }
+
+        public List<EffortEntry> GetEntriesByPurchaser(Purchaser p, int month, int year)
+        {
+            EffortEntryDAO eDao = new EffortEntryDAO();
+            List<EffortEntry> entry = eDao.GetEntriesByPurchaser(p,month,year);
+            return null;
+        }
+
+        public EffortEntry GetEntry(PersonalAssistant pa, int month, int year, int day)
+        {
+            EffortEntryDAO eDao = new EffortEntryDAO();
+            EffortEntry entry = eDao.GetEntry(pa,month,year,day);
+            return null;
+        }
+
+        public void ModifyEntry(EffortEntry e)
+        {
+            EffortEntryDAO eDao = new EffortEntryDAO();
+            eDao.UpdateEntry(e);
+        }  
+    }
+}

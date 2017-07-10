@@ -1,0 +1,409 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{5E4C6E17-2F0C-4566-9F7C-F80FEB968E16}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SelvesSoftware</RootNamespace>
+    <AssemblyName>SelvesSoftware</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>logo.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Mono.Security">
+      <HintPath>..\Mono.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Npgsql">
+      <HintPath>..\Npgsql.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="BusinessLogic\AustrianHolidays.cs" />
+    <Compile Include="BusinessLogic\EffortEntryBL.cs" />
+    <Compile Include="BusinessLogic\IEffortEntryBL.cs" />
+    <Compile Include="BusinessLogic\IMonthlyBillingBL.cs" />
+    <Compile Include="BusinessLogic\IMonthlyBillingPerPaBL.cs" />
+    <Compile Include="BusinessLogic\IPersonalAssistentBL.cs" />
+    <Compile Include="BusinessLogic\IPurchaserDataBL.cs" />
+    <Compile Include="BusinessLogic\MonthlyBillingPerPaBL.cs" />
+    <Compile Include="BusinessLogic\PAtoPurchaserBL.cs" />
+    <Compile Include="BusinessLogic\UsersBL.cs" />
+    <Compile Include="DB\IPurchaserDataDAO.cs" />
+    <Compile Include="BusinessLogic\MonthlyBillingBL.cs" />
+    <Compile Include="BusinessLogic\PersonalAssistentBL.cs" />
+    <Compile Include="BusinessLogic\PurchaserDataBL.cs" />
+    <Compile Include="BusinessLogic\TestBL.cs" />
+    <Compile Include="DataContainer\PurchaserData.cs" />
+    <Compile Include="DbTestDummies\AdressDummyDao.cs" />
+    <Compile Include="DbTestDummies\MBDummyDao.cs" />
+    <Compile Include="DbTestDummies\PaDummyDao.cs" />
+    <Compile Include="DbTestDummies\PurDummyDao.cs" />
+    <Compile Include="DB\AdressDAO.cs" />
+    <Compile Include="DB\EffortEntryDAO.cs" />
+    <Compile Include="DB\IAdressDAO.cs" />
+    <Compile Include="DB\IEffortEntryDAO.cs" />
+    <Compile Include="DB\IMonthlyBillingDao.cs" />
+    <Compile Include="DB\IPurchaserDAO.cs" />
+    <Compile Include="DB\MonthlyBillingDAO.cs" />
+    <Compile Include="DB\PAtoPurchaserDAO.cs" />
+    <Compile Include="DB\PersonDAO.cs" />
+    <Compile Include="DB\IPersonDAO.cs" />
+    <Compile Include="DB\PurchaserDAO.cs" />
+    <Compile Include="DB\PurchaserDataDAO.cs" />
+    <Compile Include="DB\Test.cs" />
+    <Compile Include="DB\DBConnector.cs" />
+    <Compile Include="DB\IPersonalAssistantDAO.cs" />
+    <Compile Include="DB\PersonalAssistantDAO.cs" />
+    <Compile Include="DataContainer\Dokument.cs" />
+    <Compile Include="DataContainer\EffortEntry.cs" />
+    <Compile Include="DataContainer\Employment.cs" />
+    <Compile Include="DataContainer\EmploymentStatus.cs" />
+    <Compile Include="DB\UsersDAO.cs" />
+    <Compile Include="ExceptionHandler\ExceptionHandler.cs" />
+    <Compile Include="GUI\Elemente\InputBox.xaml.cs">
+      <DependentUpon>InputBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Elemente\InputLabel.xaml.cs">
+      <DependentUpon>InputLabel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Elemente\SectionLabel.xaml.cs">
+      <DependentUpon>SectionLabel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Elemente\SmallInputBox.xaml.cs">
+      <DependentUpon>SmallInputBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Elemente\SmallInputLabel.xaml.cs">
+      <DependentUpon>SmallInputLabel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\GuiParser.cs" />
+    <Compile Include="GUI\Information.cs" />
+    <Compile Include="GUI\InputEvaluator.cs" />
+    <Compile Include="GUI\Monatsabrechnung\MABearbeiten.xaml.cs">
+      <DependentUpon>MABearbeiten.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Monatsabrechnung\MAHinzufügen.xaml.cs">
+      <DependentUpon>MAHinzufügen.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Monatsabrechnung\MASideNavigation.xaml.cs">
+      <DependentUpon>MASideNavigation.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Monatsabrechnung\MAÜbersicht.xaml.cs">
+      <DependentUpon>MAÜbersicht.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Monatsabrechnung\Windows\LAAuswählen.xaml.cs">
+      <DependentUpon>LAAuswählen.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Personenverwaltung\AG\AGBearbeiten.xaml.cs">
+      <DependentUpon>AGBearbeiten.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Personenverwaltung\AG\AGEinzelAnsicht.xaml.cs">
+      <DependentUpon>AGEinzelAnsicht.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Personenverwaltung\AG\AGHinzufügen.xaml.cs">
+      <DependentUpon>AGHinzufügen.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Personenverwaltung\AG\AGÜbersicht.xaml.cs">
+      <DependentUpon>AGÜbersicht.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Personenverwaltung\AG\AGSideNavigation.xaml.cs">
+      <DependentUpon>AGSideNavigation.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Main\Main.xaml.cs">
+      <DependentUpon>Main.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Main\MainNavigation.xaml.cs">
+      <DependentUpon>MainNavigation.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DataContainer\MonthlyBilling.cs" />
+    <Compile Include="DataContainer\MonthlyBillingPerPA.cs" />
+    <Compile Include="DataContainer\PersonalAssistant.cs" />
+    <Compile Include="DataContainer\Purchaser.cs" />
+    <Compile Include="GUI\Main\MainSideNavigation.xaml.cs">
+      <DependentUpon>MainSideNavigation.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Personenverwaltung\AG\Windows\ContactWindow.xaml.cs">
+      <DependentUpon>ContactWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Personenverwaltung\AG\Windows\GlobalsWindows.xaml.cs">
+      <DependentUpon>GlobalsWindows.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Personenverwaltung\AG\Windows\PAAuswählen.xaml.cs">
+      <DependentUpon>PAAuswählen.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Personenverwaltung\PA\InfoWindow.xaml.cs">
+      <DependentUpon>InfoWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Personenverwaltung\PA\PABearbeiten.xaml.cs">
+      <DependentUpon>PABearbeiten.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Personenverwaltung\PA\PAEinzelAnsicht.xaml.cs">
+      <DependentUpon>PAEinzelAnsicht.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Personenverwaltung\PA\PAHinzufügen.xaml.cs">
+      <DependentUpon>PAHinzufügen.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Personenverwaltung\PA\PAÜbersicht.xaml.cs">
+      <DependentUpon>PAÜbersicht.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Personenverwaltung\PA\PASideNavigation.xaml.cs">
+      <DependentUpon>PASideNavigation.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Main\SettingsLogin.xaml.cs">
+      <DependentUpon>SettingsLogin.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Personenverwaltung\PA\Windows\AGAuswählen.xaml.cs">
+      <DependentUpon>AGAuswählen.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Personenverwaltung\Track.cs" />
+    <Compile Include="Settings1.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings1.settings</DependentUpon>
+    </Compile>
+    <Page Include="GUI\Elemente\InputBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Elemente\InputLabel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Elemente\SectionLabel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Elemente\SmallInputBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Elemente\SmallInputLabel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Monatsabrechnung\MABearbeiten.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Monatsabrechnung\MAHinzufügen.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Monatsabrechnung\MASideNavigation.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Monatsabrechnung\MAÜbersicht.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Monatsabrechnung\Windows\LAAuswählen.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Personenverwaltung\AG\AGBearbeiten.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Personenverwaltung\AG\AGEinzelAnsicht.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Personenverwaltung\AG\AGHinzufügen.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Personenverwaltung\AG\AGÜbersicht.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Personenverwaltung\AG\AGSideNavigation.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Personenverwaltung\AG\Windows\ContactWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Personenverwaltung\AG\Windows\GlobalsWindows.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Personenverwaltung\AG\Windows\PAAuswählen.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Personenverwaltung\PA\InfoWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Personenverwaltung\PA\PABearbeiten.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Personenverwaltung\PA\PAEinzelAnsicht.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Personenverwaltung\PA\PAHinzufügen.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Personenverwaltung\PA\PASideNavigation.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Login.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="DataContainer\Adress.cs" />
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GUI\Login.xaml.cs">
+      <DependentUpon>Login.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Page Include="GUI\Main\Main.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Main\MainNavigation.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Main\MainSideNavigation.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Personenverwaltung\PA\PAÜbersicht.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Main\SettingsLogin.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Personenverwaltung\PA\Windows\AGAuswählen.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Personenverwaltung\PA\Windows\DienstHinzufügen.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DataContainer\Person.cs" />
+    <Compile Include="GUI\Personenverwaltung\PA\Windows\DienstHinzufügen.xaml.cs">
+      <DependentUpon>DienstHinzufügen.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="App1.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <AppDesigner Include="Properties\" />
+    <None Include="Settings1.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings1.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="GUI\Icons\selvesLogo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="GUI\Icons\selvesIco.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="GUI\Erfolgsrechnung\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Image1.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="logo.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="GUI\Icons\logo.ico" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

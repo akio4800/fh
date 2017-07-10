@@ -1,0 +1,112 @@
+﻿using SelvesSoftware.BusinessLogic;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using SelvesSoftware.DataContainer;
+using System.Media;
+
+namespace SelvesSoftware
+{
+    /// <summary>
+    /// Interaction logic for SelvesSoftware.xaml
+    /// </summary>
+    public partial class LoginWindow : Window
+    {
+        private UsersBL _bl = new UsersBL();
+        private List<String> users;
+
+        public List<String> Usernames
+        {
+            get; set;
+        }
+        private void Login(object sender, EventArgs e)
+        {
+            if (_bl.verifyPassword(User.SelectedItem as String, Password.Password))
+            {
+                var a = App.Current as App;
+                a.activeUser = User.SelectedItem as String;
+                Main window = new Main();
+                window.Show();
+                this.Close();
+            }
+            else
+            {
+                SystemSounds.Asterisk.Play();
+                MessageBox.Show("Falsches Passwort!", "Fehler!");
+            }
+
+
+
+        }
+        private void Reset(object sender, EventArgs e)
+        {
+
+            Password.Clear();
+            //   DB.Test.TestPersonDao();
+        }
+
+        public LoginWindow()
+        {
+
+            InitializeComponent();
+            CenterWindowOnScreen();
+            var a = App.Current as App;
+            a.activeUser = null;
+
+            try
+            {
+                Usernames = _bl.getUsers();
+            }
+            catch
+            {
+                SystemSounds.Asterisk.Play();
+                MessageBox.Show("Anmelden derzeit nicht möglich!", "Fehler!");
+            }
+            User.ItemsSource = Usernames;
+            
+
+        }
+
+        private void CenterWindowOnScreen()
+        {
+            double screenWidth = System.Windows.SystemParameters.PrimaryScreenWidth;
+            double screenHeight = System.Windows.SystemParameters.PrimaryScreenHeight;
+            double windowWidth = this.Width;
+            double windowHeight = this.Height;
+            this.Left = (screenWidth / 2) - (windowWidth / 2);
+            this.Top = (screenHeight / 2) - (windowHeight / 2);
+        }
+
+        private void Password_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                if (_bl.verifyPassword(User.SelectedItem as String, Password.Password))
+                {
+                    var a = App.Current as App;
+                    a.activeUser = User.SelectedItem as String;
+                    Main window = new Main();
+                    window.Show();
+                    this.Close();
+                }
+                else
+                {
+                    SystemSounds.Asterisk.Play();
+                    MessageBox.Show("Falsches Passwort!", "Fehler!");
+                }
+
+            }
+        }
+    }
+}

@@ -1,0 +1,38 @@
+﻿<Page x:Class="SelvesSoftware.GUI.PaÜbersichtSideNavigation"
+           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      mc:Ignorable="d" 
+      d:DesignHeight="500" d:DesignWidth="200"
+	Title="Navigation">
+    <Grid   Margin="0" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="23*"/>
+        </Grid.RowDefinitions>
+
+
+
+        <Border BorderBrush="Black" BorderThickness="2" Background="#FFBDBDBD"/>
+
+
+
+        <Label Content="Navigation" Margin="0"  FontWeight="Bold" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="16" />
+        <Border BorderBrush="Black" BorderThickness="2" Grid.Row="1" Background="AliceBlue" >
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30*"/>
+                    <RowDefinition Height="30*"/>
+                    <RowDefinition Height="30*"/>
+                    <RowDefinition Height="125*"/>
+                </Grid.RowDefinitions>
+                <Label Name="PaHinzufügen" Content="Assistent hinzufügen" Grid.Row="1" Margin="5"  VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="14" MouseEnter="PA_Hinzufügen_MouseEnter" MouseLeave="PA_Hinzufügen_MouseLeave" MouseLeftButtonDown="PA_Hinzufügen_MouseLeftButtonDown"/>
+                <Label Name="PaBearbeiten" Content="Assistent bearbeiten" Grid.Row="2" Margin="5"  VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="14"  MouseEnter="PA_Bearbeiten_MouseEnter" MouseLeave="PA_Bearbeiten_MouseLeave" MouseLeftButtonDown="PA_Bearbeiten_MouseLeftButtonDown"/>
+                <Label Name="PaÜbersicht" Content="Übersicht" Grid.Row="0" Margin="5"  VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="14" MouseEnter="PA_Übersicht_MouseEnter" MouseLeave="PA_Übersicht_MouseLeave" MouseLeftButtonDown="PA_Übersicht_MouseLeftButtonDown"/>
+            </Grid>
+        </Border>
+
+
+    </Grid>
+</Page>

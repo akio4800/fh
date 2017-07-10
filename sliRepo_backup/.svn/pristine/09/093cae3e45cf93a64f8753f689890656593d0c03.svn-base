@@ -1,0 +1,52 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+
+namespace SelvesSoftware.GUI.Monatsabrechnung
+{
+    /// <summary>
+    /// Interaktionslogik für MAHinzufügen.xaml
+    /// </summary>
+    public partial class MAHinzufügen : Page
+    {
+        public MAHinzufügen()
+        {
+            InitializeComponent();
+
+            ///<summary>
+            ///wird in Klasse Lestungaufzeichnung verschoben 
+            /// </summary>
+
+
+            //activity1.Items.Add("Nachtbereitschaft");
+            //activity1.Items.Add("Unterstützung bei der Grundversorgung");
+            //activity1.Items.Add("Hauswirtschafltiche Tätigkeiten");
+            //activity1.Items.Add("Begleitung und Mobilität");
+            //activity1.Items.Add("Freizeitgestaltung");
+            //activity1.Items.Add("Unterstützung bei jeder Form der Kommunikation");
+
+            //activity2.Items.Add("Unterstützung bei der Grundversorgung");
+            //activity2.Items.Add("Hauswirtschafltiche Tätigkeiten");
+            //activity2.Items.Add("Begleitung und Mobilität");
+            //activity2.Items.Add("Freizeitgestaltung");
+            //activity2.Items.Add("Unterstützung bei jeder Form der Kommunikation");
+
+            //activity3.Items.Add("Unterstützung bei der Grundversorgung");
+            //activity3.Items.Add("Hauswirtschafltiche Tätigkeiten");
+            //activity3.Items.Add("Begleitung und Mobilität");
+            //activity3.Items.Add("Freizeitgestaltung");
+            //activity3.Items.Add("Unterstützung bei jeder Form der Kommunikation");
+        }
+    }
+}

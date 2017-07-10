@@ -1,0 +1,35 @@
+ command.CommandText = "SELECT * FROM auftraggeberdaten WHERE agid=@id AND  monat <= @monat AND jahr=@jahr " +
+                                    "ORDER BY monat DESC LIMIT 1";
+            DB.DBConnector.AddToCommand("@id", NpgsqlTypes.NpgsqlDbType.Numeric, command, pur.Purchaser.Id);
+            DB.DBConnector.AddToCommand("@monat", NpgsqlTypes.NpgsqlDbType.Numeric, command, pur.Month);
+            DB.DBConnector.AddToCommand("@jahr", NpgsqlTypes.NpgsqlDbType.Numeric, command, pur.Year);
+            //restlichen parameter
+            //while(reader.
+
+            NpgsqlDataReader readerF = command.ExecuteReader();
+
+            readerF.Read();
+            while (!readerF.HasRows)
+            {
+                //neues commando und parameter
+                readerF = command.ExecuteReader();
+            }
+
+            decimal month = 0;
+            decimal year = 0;
+
+            if (!(readerF.IsDBNull(0)))
+            {
+                month = readerF.GetDecimal(0);
+            }
+            if (!(readerF.IsDBNull(1)))
+            {
+                year = readerF.GetDecimal(1);
+            }
+
+            command.CommandText = "SELECT * FROM Auftraggeberdaten WHERE agid=@id AND monat=@month AND jahr=@year";
+
+            DB.DBConnector.AddToCommand("@id", NpgsqlTypes.NpgsqlDbType.Numeric, command, pur.Purchaser.Id);
+            DB.DBConnector.AddToCommand("@month", NpgsqlTypes.NpgsqlDbType.Numeric, command, month);
+            DB.DBConnector.AddToCommand("@year", NpgsqlTypes.NpgsqlDbType.Numeric, command, year);
+            readerF.Close();

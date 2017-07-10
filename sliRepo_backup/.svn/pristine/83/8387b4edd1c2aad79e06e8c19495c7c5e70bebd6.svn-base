@@ -1,0 +1,186 @@
+﻿using System;
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SelvesSoftware;
+using SelvesSoftware.BusinessLogic;
+using SelvesSoftware.DbTestDummies;
+using System.Diagnostics;
+using SelvesSoftware.DataContainer;
+using SelvesSoftware.DBDummies;
+using System.Collections.Generic;
+
+namespace TestBL
+{
+    [TestClass]
+    public class UnitTest1
+    {
+        [TestMethod]
+        public void TestSelectPa()
+        {
+            PersonalAssistant test = new PersonalAssistant();
+            test.Id = 54321;
+            PersonalAssistentBl pBl = new PersonalAssistentBl();
+            pBl.PaDao = new PaDummyDao();
+            test = pBl.SelectPa(54321);
+            if (test == null)
+            {
+                Console.WriteLine("Pa nicht gefunden");
+            }
+            else
+            {
+                PrintPa(test);
+            }
+        }
+        
+        private static void PrintPa(PersonalAssistant pa)
+        {
+           // Debug.Assert(pa.Active == true);
+           // Debug.Assert(pa.ClosingDateDocuments.Equals(new DateTime(2015, 10, 10)));
+           // Debug.Assert(pa.EmploymentTimes[0].EmplBegin.Equals(new DateTime(2000, 01, 01)));
+           // Debug.Assert(pa.Active == true);
+           // Debug.Assert(pa.ClosingDateDocuments == new DateTime(2015, 10, 10));
+           // Debug.Assert(pa.EMail.Equals("test@test.at"));
+           // Debug.Assert(pa.EmploymentTimes[0].EmplBegin == new DateTime(2000, 01, 01));
+           // Debug.Assert(pa.EmploymentTimes[0].EmplEnd == new DateTime(2001, 01, 01));
+           // Debug.Assert(pa.EmploymentTimes[1].EmplBegin == new DateTime(2014, 01, 01));
+           // Debug.Assert(pa.FirstName.Equals("Muster"));
+           // Debug.Assert(pa.LastName.Equals("Franz"));
+           // Debug.Assert(pa.MobilePhone == 07327773546);
+           // //Debug.Assert(pa.Purchasers[0].LastName.Equals("Huber"));
+           //// Debug.Assert(pa.Purchasers[0].FirstName.Equals("Hansl"));
+           // Debug.Assert(pa.PhoneNumber == 18923742774);
+           // Debug.Assert(pa.HomeAdress == new Adress("Teststreet", 12, 4209, "Hagenberg"));
+
+            Console.WriteLine(pa.Active.ToString());
+            Console.WriteLine(pa.ClosingDateDocuments.ToString());
+            Console.WriteLine(pa.EmploymentTimes[0].EmplBegin.ToString());
+       
+            Console.WriteLine(pa.ClosingDateDocuments.ToString());
+            Console.WriteLine(pa.EMail);
+            Console.WriteLine(pa.EmploymentTimes[0].EmplBegin.ToString());
+            Console.WriteLine(pa.EmploymentTimes[0].EmplEnd.ToString());
+            Console.WriteLine(pa.EmploymentTimes[1].EmplBegin.ToString());
+            Console.WriteLine(pa.FirstName);
+            Console.WriteLine(pa.LastName);
+            Console.WriteLine(pa.MobilePhone);
+            foreach (Purchaser p in pa.Purchasers)
+            {
+                Console.WriteLine(p.LastName);
+                Console.WriteLine(p.FirstName);
+            }
+            
+           
+            Console.WriteLine(pa.PhoneNumber);
+            Console.WriteLine(pa.HomeAdress.ConvertToString());
+            
+
+        }
+
+         [TestMethod]
+        public void testSelectedPurchaser()
+        {
+            PurchaserData test = new PurchaserData();
+            PurchaserDataBl p = new PurchaserDataBl();
+            p.PurDao = new PurDummyDao();
+            test = p.SelectPurchaser(54321);
+            if (test == null)
+            {
+                Console.WriteLine("Pa nicht gefunden");
+            }
+            else
+            {
+                PrintPur(test);
+            }
+        }
+        private static void PrintPur(PurchaserData pur)
+        {
+            Debug.Assert(pur.Purchaser.Active == true);
+            Debug.Assert(pur.Purchaser.EMail.Equals("test@test.at"));
+            Debug.Assert(pur.Purchaser.FirstName.Equals("Hugo"));
+            Debug.Assert(pur.Purchaser.LastName.Equals("Huber"));
+            Debug.Assert(pur.Purchaser.MobilePhone == "982374283745");
+            Debug.Assert(pur.Purchaser.EntryDate == new DateTime(2010, 12, 12));
+            Debug.Assert(pur.Purchaser.EMail.Equals("test@test.at"));
+            Debug.Assert(pur.Purchaser.ApprovalBegin == new DateTime(2015, 01, 01));
+            Debug.Assert(pur.Purchaser.ApprovalEnd == new DateTime(2015, 12, 31));
+            Debug.Assert(pur.Purchaser.ContactPerson ==
+            new Person("Maria", "Huber", new Adress("Hauptstrasse", 12, 4040, "Linz")));
+            Debug.Assert(pur.Purchaser.Employees[0].Assistant == new PersonalAssistant(new Person("Brigitte", "Fritte",
+            new Adress("Landstrasse", 22, 4209, "Engerwitzdorf"))));
+            Debug.Assert(pur.Purchaser.Employees[0].Assistant == new PersonalAssistant(new Person("Max", "Moritz",
+            new Adress("Maienweg", 22, 4209, "Engerwitzdorf"))));
+            Debug.Assert(pur.Purchaser.HomeAdress == new Adress("Heimatstrasse", 124, 2345, "Wien"));
+            Debug.Assert(pur.Purchaser.PhoneNumber == "28374937453987");
+            Debug.Assert(pur.Income == 1500);
+            Debug.Assert(pur.InputIncome == 150);
+            Debug.Assert(pur.Month == 6);
+            Debug.Assert(pur.Year == 2015);
+            Debug.Assert(pur.TravellingAllowanceKM == (decimal)0.22);
+            Debug.Assert(pur.HourlyRate == 20);
+            Debug.Assert(pur.HourlyRatePayoff == (decimal)20.5);
+            Debug.Assert(pur.CareAllowanceMaximum == 300);
+            Debug.Assert(pur.CareAllowance == 2);
+            Debug.Assert(pur.AssistenceDemand == 60);
+        }
+
+
+        [TestMethod]
+        public void TestSelectMb()
+        {
+            List<MonthlyBilling> test = new List<MonthlyBilling>();
+            MonthlyBillingBl mb = new MonthlyBillingBl();
+            MonthlyBilling m = new MonthlyBilling();
+            mb.MbDao = new MbDummyDao();
+            test=mb.SelectAllMB();
+
+            if (test == null)
+            {
+                Console.WriteLine("Pa nicht gefunden");
+            }
+            else
+            {
+                PrintMb(test);
+            }
+        }
+
+        private static void PrintMb(List<MonthlyBilling> test)
+        {
+            foreach (MonthlyBilling m in test)
+            {
+                Console.WriteLine("tatsächlich ausbezahlter Betrag: " + m.AmountActuallyPaid);
+                Console.WriteLine("tats verbr Stunden: " + m.ConsumedHoursAmount);
+                Console.WriteLine("beitrag aus pg: " + m.ContributionCareAllowance);
+                Console.WriteLine("aktuelles Stundenguthaben: " + m.CurrentHourDeposit);
+                Console.WriteLine("Diff: " + m.Difference);
+                Console.WriteLine("diff prev: " + m.DifferenceToPreviousMonth);
+                Console.WriteLine("Stundenkontingent: " + m.HourContingent);
+                Console.WriteLine("Abgerechneter Betrag: " + m.PayOut);
+                Console.WriteLine("Ausbezaahlter Betrag: " + m.PayOff);
+                Console.WriteLine("verbleibende stunden: " + m.RemainingHours);
+                Console.WriteLine("bisher verbrauchte stunden: " + m.SoFarTookHours);
+                Console.WriteLine("Summe stunden: " + m.SumHours);
+                Console.WriteLine("summe km: " + m.SumKm);
+                Console.WriteLine("Fahrtkosten: " + m.TravelExpences);
+               
+                
+
+
+
+                foreach (MonthlyBillingPerPa ppa in m.Mb)
+                {
+                    Console.WriteLine("Abrechenbare KM: " + ppa.BillableKm);
+                    Console.WriteLine("Privat KM: " + ppa.PrivateKm);
+                    Console.WriteLine("Summe Stunden: " + ppa.WorkingHours);
+
+                    foreach (EffortEntry ee in ppa.EffortList)
+                    {
+                        Console.WriteLine("KM: " + ee.Km);
+                        Console.WriteLine("A1: " + ee.A1.ToString());
+                       
+                    }
+
+                }
+            }
+        }
+    }
+}

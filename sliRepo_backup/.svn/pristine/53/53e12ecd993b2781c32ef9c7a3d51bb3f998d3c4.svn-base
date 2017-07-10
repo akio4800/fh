@@ -1,0 +1,168 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
+using SelvesSoftware.BusinessLogic;
+
+namespace SelvesSoftware.GUI.Personenverwaltung.AG.Windows
+{
+    /// <summary>
+    /// Interaction logic for PAAuswählen.xaml
+    /// </summary>
+    public partial class PAAuswählen : Window
+    {
+        private ObservableCollection<Track> Data = new ObservableCollection<Track>();
+        private List<PersonalAssistant> InputList;
+        private IPersonalAssistentBl _bl;
+
+        public IPersonalAssistentBl bl
+        {
+            get
+            {
+                if (_bl == null)
+                {
+                    _bl = new PersonalAssistentBl();
+                }
+                return _bl;
+            }
+            set
+            {
+                _bl = value;
+            }
+        }
+
+        private class Track
+        {
+            private String _fn;
+            private String _ln;
+            private long _id;
+
+            public String FirstName
+            {
+                get { return _fn; }
+                set { _fn = value; }
+            }
+
+            public String LastName
+            {
+                get { return _ln; }
+                set { _ln = value; }
+            }
+            public long Id
+            {
+                get { return _id; }
+                set { _id = value; }
+            }
+            public Track(long id, String firstname, String lastname)
+            {
+                _fn = firstname;
+                _ln = lastname;
+                _id = id;
+            }
+            public Track() { }
+
+            
+        }
+
+        public int MainIndex { get; set; }
+        public int idx { get; set; }
+
+        private AgHinzufügen newAG;
+        private AgBearbeiten editAG;
+
+        public PAAuswählen(AgBearbeiten agBearbeiten)
+        {
+            editAG = agBearbeiten;
+            InitializeComponent();
+            setPersonalAssistantDataOnGrid(editAG.employedPA);
+        }
+        public PAAuswählen(AgHinzufügen agHinzufügen)
+        {
+            newAG = agHinzufügen;
+            InitializeComponent();
+            setPersonalAssistantDataOnGrid(newAG.employedPA);
+        }
+        private void setPersonalAssistantDataOnGrid(List<PersonalAssistant> employedPA)
+        {
+            InputList = bl.SelectAllPa();
+                        
+            for (int i = InputList.Count-1; i >=0; --i)
+            {
+                if (employedPA == null)
+                {
+                    Data.Add(new Track() { Id = InputList[i].Id, FirstName = InputList[i].FirstName, LastName = InputList[i].LastName });
+                }
+                else
+                {
+                    bool paAlreadyIn = false;
+                    foreach (PersonalAssistant pa in employedPA)
+                    {
+                        if (pa.Id == InputList[i].Id)
+                        {
+                            paAlreadyIn = true;
+                        }
+                    }
+                    if (!paAlreadyIn)
+                    {
+                        Data.Add(new Track(InputList[i].Id, InputList[i].FirstName, InputList[i].LastName));
+                    } else
+                    {
+                        InputList.RemoveAt(i);
+                        
+                    }
+                }
+
+            }
+            
+            
+            GridÜbersicht.DataContext = new ObservableCollection<Track>(Data.Reverse());
+        }
+       
+        public PAAuswählen()
+        {
+            InitializeComponent();
+        }
+
+        private void GridÜbersicht_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var a = App.Current as App;
+            MainIndex = GridÜbersicht.SelectedIndex;
+            a.AGIndex = InputList[MainIndex].Id;
+        }
+
+        private void exit_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void button_Click(object sender, RoutedEventArgs e)
+        {
+            //add connection and show pa in list
+            if (newAG != null)
+            {
+                newAG.employedPA.Add(InputList[MainIndex]);
+                newAG.employedPersonalAssistants.Items.Add(new AgBearbeiten.Track(InputList[MainIndex].Id, InputList[MainIndex].FirstName, InputList[MainIndex].LastName));
+
+            }
+            else if (editAG != null)
+            {
+                editAG.employedPA.Add(InputList[MainIndex]);
+                
+                editAG.guiListEmployed.Add(new AgBearbeiten.Track(InputList[MainIndex].Id, InputList[MainIndex].FirstName, InputList[MainIndex].LastName));
+            }
+
+            this.Close();
+        }
+    }
+}

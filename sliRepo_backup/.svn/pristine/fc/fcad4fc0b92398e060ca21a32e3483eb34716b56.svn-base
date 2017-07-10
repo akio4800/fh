@@ -1,0 +1,197 @@
+﻿using SelvesSoftware.BusinessLogic;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+
+namespace SelvesSoftware.GUI.Personenverwaltung.PA
+{
+    /// <summary>
+    /// Interaktionslogik für PAEinzelAnsicht.xaml
+    /// </summary>
+    public partial class PAEinzelAnsicht : Page
+    {
+        private InfoWindow infoW;
+        PersonalAssistant pa;
+        IPersonalAssistentBl _bl;
+        public IPersonalAssistentBl bl
+        {
+            get
+            {
+                if (_bl == null)
+                {
+                    _bl = new PersonalAssistentBl();
+                }
+                return _bl;
+            }
+            set
+            {
+                _bl = value;
+            }
+        }
+
+        private void getAssistant()
+        {
+
+            var a = App.Current as App;
+            pa = bl.SelectPa((int)a.PAIndex);
+
+            FirstName.Text = pa.FirstName;
+            LastName.Text = pa.LastName;
+            MobileNr.Text = pa.MobilePhone;
+            PhoneNr.Text = pa.PhoneNumber;
+            Email.Text = pa.EMail;
+            SVN.Text = pa.SVN.ToString();
+            Street.Text = pa.HomeAdress.Street;
+            Country.Text = pa.HomeAdress.Country;
+            HNr.Text = pa.HomeAdress.HouseNumber.ToString();
+            DoorNr.Text = pa.HomeAdress.DoorNumber.ToString();
+            Etage.Text = pa.HomeAdress.Etage.ToString();
+            StairNr.Text = pa.HomeAdress.StairNumber.ToString();
+            City.Text = pa.HomeAdress.City;
+            ZIP.Text = pa.HomeAdress.ZipCode.ToString();
+            nationality.Text = pa.nationality;
+            SVN.Text = (pa.SVN == 0) ? " " : pa.SVN.ToString();
+
+
+            if (pa.ClosingDateDocuments != null){ documentDate.Text = pa.ClosingDateDocuments.Value.ToShortDateString();}
+          
+
+            IBAN.Text = pa.IBAN;
+            BIC.Text = pa.BIC;
+            kontoinhaber.Text = pa.AccountHolder;
+
+            SV.IsChecked = pa.SV;
+            Dienstvertrag.IsChecked = pa.Dienstvertrag;
+            BestätigungBH.IsChecked = pa.BestBH;
+            Grundkurs.IsChecked = pa.Grundkurs;
+
+            tbHours.Text = pa.consumedHours.ToString();
+            if(pa.deadLineHours!=null)
+            tbDeadline.Text = pa.deadLineHours.Value.ToShortDateString();
+
+            if (pa.Active)
+            {
+                activeRadioBtn.IsChecked = true;
+                inactiveRadioBtn.IsChecked = false;
+            }
+            else
+            {
+                activeRadioBtn.IsChecked = false;
+                inactiveRadioBtn.IsChecked = true;
+            }
+
+            if (pa.EmploymentTimes != null)
+            {
+                foreach (Employment e in pa.EmploymentTimes)
+                {
+                    String pd;
+                    if (e.EmplEnd.Year != 1)
+                    {
+                       pd = e.EmplBegin.ToShortDateString() + " - " + e.EmplEnd.ToShortDateString();
+                    }
+                    else
+                    {
+                        pd = e.EmplBegin.ToShortDateString();
+                    }
+                    employment.Items.Add(pd);
+                }
+            }
+            else
+            {
+                employment.Items.Add("Keine Dienste");
+
+            }
+
+            if (pa.Purchasers != null)
+            {
+                foreach (Purchaser p in pa.Purchasers)
+                {
+                    String pd = p.FirstName + " " + p.LastName;
+                    AGList.Items.Add(pd);
+                }
+            }
+            else
+            {
+                AGList.Items.Add("Keine Auftraggeber");
+            }
+
+
+            if (pa.InfoField == null || InfoEmpty())
+            {
+                btnInfo.IsEnabled = false;
+            }
+        }
+
+        private bool InfoEmpty()
+        {
+            return pa.InfoField == null || pa.InfoField == "";
+        }
+
+
+    
+
+
+
+        public PAEinzelAnsicht()
+        {
+           
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (window.GetType() == typeof(Main))
+                {
+                    (window as Main).windowHeader.Content = "STAMMDATEN PERSÖNLICHER ASSISTENT";
+
+
+                }
+            }
+            InitializeComponent();
+            getAssistant();
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (window.GetType() == typeof(Main))
+                {
+                    (window as Main).FrameÜbersicht.Source = new Uri("../Personenverwaltung/PA/PABearbeiten.xaml", UriKind.Relative);
+                }
+            }
+        }
+
+        private void btn_back_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (window.GetType() == typeof(Main))
+                {
+                    (window as Main).FrameÜbersicht.Source = new Uri("../Personenverwaltung/PA/PAÜbersicht.xaml", UriKind.Relative);
+
+
+                }
+            }
+        }
+
+
+
+        private void btnInfo_Click_1(object sender, RoutedEventArgs e)
+        {
+            infoW = new InfoWindow(pa.InfoField);
+            infoW.btnSave.IsEnabled = false;
+            infoW.tbInfo.IsEnabled = false;
+            infoW.ShowDialog();
+            //pa.InfoField = infoW.tbInfo.Text;
+        }
+    }
+}

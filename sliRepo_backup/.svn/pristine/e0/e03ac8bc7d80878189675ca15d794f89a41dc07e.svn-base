@@ -1,0 +1,97 @@
+﻿using SelvesSoftware.DB;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+namespace SelvesSoftware.BusinessLogic
+{
+    public class PersonalAssistentBl : IPersonalAssistentBl
+    {
+        private IPersonalAssistantDAO _paDao;
+        public IPersonalAssistantDAO PaDao
+        {
+            get
+            {
+                if (_paDao == null)
+                {
+                    _paDao = new PersonalAssistantDAO();
+                }
+                return _paDao;
+            }
+            set
+            {
+                _paDao = value;
+            }
+        }
+        public PersonalAssistant SelectPa(int id)
+        {
+            PersonalAssistant p = new PersonalAssistant(id);
+            try
+            {
+                p = PaDao.select(p);
+                //if kein patient gefunden....
+            }
+            catch (Exception e)
+            {
+
+                Console.WriteLine("Select hat nix gefunden");
+            }
+            return p;
+        }
+        public List<PersonalAssistant> SelectAllPa()
+        {
+            List<PersonalAssistant> paList = new List<PersonalAssistant>();
+            paList = PaDao.SelectAll();
+            //Fehlerbehandlung
+            return paList;
+        }
+
+        public List<PersonalAssistant> SelectSpecificPa(PersonalAssistant pa)
+        {
+            List<PersonalAssistant> paList = new List<PersonalAssistant>();
+            paList = PaDao.SelectSpecific(pa);
+            //Fehlerbehandlung
+            return paList;
+        }
+
+        public bool CreatePa(PersonalAssistant pa)
+        {
+            if (EntriesValid())
+            {
+                _paDao = new PersonalAssistantDAO();
+                try
+                {
+                    PaDao.insert(pa);
+
+                    // adding employment status
+                    if (pa.Purchasers != null)
+                    {
+                       foreach(Purchaser p in pa.Purchasers)
+                        {
+                            PaDao.insertEmploymentStatus(p, pa);
+                        }
+                    }
+                }
+                catch (ExceptionHandler e)
+                {
+                }
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        private bool EntriesValid()
+        {
+            return true;
+        }
+        public bool UpdatePa(PersonalAssistant pa)
+        {
+            PaDao.update(pa);
+            //Fehlerbehandlung
+            return true;
+        }
+    }
+}

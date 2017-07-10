@@ -1,0 +1,272 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using Npgsql;
+using SelvesSoftware.DataContainer;
+
+
+
+
+namespace SelvesSoftware.DB
+{
+    public class PurchaserDAO : IPurchaserDAO
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pur">Leerer Purchaser DataCollector, der nur die ID des zu suchenden enthält</param>
+        /// <returns>Gesuchten Auftraggeber</returns>
+        public Purchaser Select(Purchaser pur)
+        {
+            PersonDAO perdao = (new PersonDAO());
+            Person p = perdao.Select(pur);
+            
+
+            
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+
+             
+
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "Select * from auftraggeber p where p.agid=@id";
+
+            DB.DBConnector.AddToCommand("@id", NpgsqlTypes.NpgsqlDbType.Numeric, command, pur.Id);
+
+            //using the Connection to get Datas
+            NpgsqlDataReader reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                if (!(reader.IsDBNull(0)))
+                {
+                    pur.Active = reader.GetBoolean(0);
+                }
+                if (!(reader.IsDBNull(1)))
+                {
+                    pur.ApprovalBegin = reader.GetDateTime(1);
+                }
+                if (!(reader.IsDBNull(2)))
+                {
+                    pur.ApprovalEnd = reader.GetDateTime(2);
+                }
+                if (!(reader.IsDBNull(3)))
+                {
+                    pur.EntryDate = reader.GetDateTime(3);
+                }
+                // 4 ist die id und wird hier nicht überschrieben, da schon vorhanden
+                if (!(reader.IsDBNull(5)))
+                {
+                    pur.ContactPerson = new Person();
+                    pur.ContactPerson.Id = reader.GetInt32(5);
+                }
+                if (!(reader.IsDBNull(6)))
+                {
+                    pur.hasIntroCourse = reader.GetBoolean(6);
+                }
+                if (!(reader.IsDBNull(7)))
+                {
+                    pur.hasContract = reader.GetBoolean(7);
+                }
+
+                if (!(reader.IsDBNull(8))){
+
+                    pur.DistrictCommision = reader.GetString(8);
+                }
+
+
+                if (pur.ContactPerson != null)
+                {
+                    pur.ContactPerson = (new PersonDAO()).Select(pur.ContactPerson);
+                }
+
+                
+            }
+            reader.Close();
+            con.Close();
+
+            pur.Employees = SelectEmploymentStatusList(pur);
+
+
+            return pur;
+        }
+        /// <summary>
+        /// Alle in der Datenbank befindlichen Auftraggeber werden gesucht
+        /// </summary>
+        /// <param name="paList"></param>
+        /// <returns></returns>
+        public List<Purchaser> SelectAll()
+        {
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+
+             
+
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "SELECT agid FROM Auftraggeber";
+
+            List<Purchaser> purs = new List<Purchaser>();
+            try { NpgsqlDataReader reader = command.ExecuteReader(); 
+
+            List<int> ids = new List<int>();
+
+            while (reader.Read())
+            {
+                ids.Add(reader.GetInt32(0));
+            }
+
+            con.Close();
+
+            foreach (int id in ids)
+            {
+                Purchaser pur = new Purchaser();
+                pur.Id = id;
+                this.Select(pur);
+                purs.Add(pur);
+            }
+
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message.ToString(), "Error");
+            }
+            return purs;
+        }
+
+        public Purchaser Insert(Purchaser person)
+        {
+            //Person selbst hinzufügen
+            PersonDAO personDao = new PersonDAO();
+            Person pa = personDao.Insert(person); //returniert neu eingefügte person mit neuer id
+
+            String insertText = "";
+            if (person.ContactPerson != null)
+            {
+                person.ContactPerson = (new PersonDAO()).Insert(person.ContactPerson);
+                insertText = "INSERT INTO auftraggeber (agid,aktiv,bewilligungsanfang, bewilligungsende, " +
+            "eintrittsdatum, kontaktperson,hateinfuehrungskurs,hatkontrakt,bezirkshauptmannschaft) VALUES (@agid,@aktiv,@bewilligungsanfang, @bewilligungsende, @eintrittsdatum, @kontaktperson,@hateinfuehrungskurs,@hatkontrakt,@bezirkshauptmannschaft)";
+            }
+            else
+            {
+                insertText = "INSERT INTO auftraggeber (agid,aktiv,bewilligungsanfang, bewilligungsende, " +
+            "eintrittsdatum,hateinfuehrungskurs,hatkontrakt,bezirkshauptmannschaft) VALUES (@agid,@aktiv,@bewilligungsanfang, @bewilligungsende, @eintrittsdatum,@hateinfuehrungskurs,@hatkontrakt,@bezirkshauptmannschaft)";
+            }
+
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+
+             
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+
+            command.CommandText = insertText;
+
+            DB.DBConnector.AddToCommand("@agid", NpgsqlTypes.NpgsqlDbType.Numeric, command, person.Id);
+            DB.DBConnector.AddToCommand("@aktiv", NpgsqlTypes.NpgsqlDbType.Boolean, command, person.Active);
+            DB.DBConnector.AddToCommand("@bewilligungsanfang", NpgsqlTypes.NpgsqlDbType.Date, command, person.ApprovalBegin);
+            DB.DBConnector.AddToCommand("@bewilligungsende", NpgsqlTypes.NpgsqlDbType.Date, command, person.ApprovalEnd);
+            DB.DBConnector.AddToCommand("@eintrittsdatum", NpgsqlTypes.NpgsqlDbType.Date, command, person.EntryDate);
+            DB.DBConnector.AddToCommand("@hateinfuehrungskurs", NpgsqlTypes.NpgsqlDbType.Boolean, command, person.hasIntroCourse);
+            DB.DBConnector.AddToCommand("@hatkontrakt", NpgsqlTypes.NpgsqlDbType.Boolean, command, person.hasContract);
+            if (person.ContactPerson != null)
+            {
+                DB.DBConnector.AddToCommand("@kontaktperson", NpgsqlTypes.NpgsqlDbType.Numeric, command, person.ContactPerson.Id);
+            }
+            DB.DBConnector.AddToCommand("@bezirkshauptmannschaft", NpgsqlTypes.NpgsqlDbType.Varchar, command, person.DistrictCommision);
+            try {command.ExecuteNonQuery();}catch(Exception e){MessageBox.Show(e.Message.ToString(),"Error");}
+            con.Close();
+            
+            
+            return person;
+
+        }
+
+        public bool Update(Purchaser person)
+        {
+            PersonDAO pdao = new PersonDAO();
+            pdao.Update(person);
+
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+
+             
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "UPDATE auftraggeber SET aktiv=@aktiv,bewilligungsanfang=@bewilligungsanfang, "+
+                "bewilligungsende=@bewilligungsende, eintrittsdatum=@eintrittsdatum, kontaktperson=@kontaktperson ,hateinfuehrungskurs=@hateinfuehrungskurs,hatkontrakt=@hatkontrakt, bezirkshauptmannschaft=@bezirkshauptmannschaft WHERE agid=@agid";
+
+            DB.DBConnector.AddToCommand("@agid", NpgsqlTypes.NpgsqlDbType.Numeric, command, person.Id);
+            DB.DBConnector.AddToCommand("@aktiv", NpgsqlTypes.NpgsqlDbType.Boolean, command, person.Active);
+            DB.DBConnector.AddToCommand("@bewilligungsanfang", NpgsqlTypes.NpgsqlDbType.Date, command, person.ApprovalBegin);
+            DB.DBConnector.AddToCommand("@bewilligungsende", NpgsqlTypes.NpgsqlDbType.Date, command, person.ApprovalEnd);
+            DB.DBConnector.AddToCommand("@eintrittsdatum", NpgsqlTypes.NpgsqlDbType.Date, command, person.EntryDate);
+            DB.DBConnector.AddToCommand("@hateinfuehrungskurs", NpgsqlTypes.NpgsqlDbType.Boolean, command, person.hasIntroCourse);
+            DB.DBConnector.AddToCommand("@hatkontrakt", NpgsqlTypes.NpgsqlDbType.Boolean, command, person.hasContract);
+            if (person.ContactPerson != null)
+            {
+                DB.DBConnector.AddToCommand("@kontaktperson", NpgsqlTypes.NpgsqlDbType.Numeric, command, person.ContactPerson.Id);
+            }
+            else
+            {
+                DB.DBConnector.AddToCommand("@kontaktperson", NpgsqlTypes.NpgsqlDbType.Numeric, command, null);
+            }
+            DB.DBConnector.AddToCommand("@bezirkshauptmannschaft", NpgsqlTypes.NpgsqlDbType.Varchar, command, person.DistrictCommision);
+            try {command.ExecuteNonQuery();}catch(Exception e){MessageBox.Show(e.Message.ToString(),"Error");}
+
+            con.Close();
+            return true;
+        }
+
+        public List<EmploymentStatus> SelectEmploymentStatusList(Purchaser pur)
+        {
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+
+             
+
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "SELECT * FROM Dienstverhaeltnis p WHERE p.agid=@id";
+
+            DB.DBConnector.AddToCommand("@id", NpgsqlTypes.NpgsqlDbType.Integer, command, pur.Id);
+
+            NpgsqlDataReader reader = command.ExecuteReader();
+            List<int> paIDs = new List<int>();
+            while (reader.Read())
+            {
+                if (!reader.IsDBNull(1))
+                {
+                    paIDs.Add(reader.GetInt32(1));
+                }
+            }
+            reader.Close();
+            con.Close();
+
+            PersonalAssistantDAO paDAO = new PersonalAssistantDAO();
+            pur.Employees = new List<EmploymentStatus>();
+            foreach (int i in paIDs)
+            {
+                PersonalAssistant pa = new PersonalAssistant();
+                pa.Id = i;
+                pa = paDAO.selectReduced(pa);
+                EmploymentStatus empStatus = new EmploymentStatus();
+                empStatus.Assistant = pa;
+                empStatus.Purchaser = pur;
+                pur.Employees.Add(empStatus);
+            }
+
+            return pur.Employees;
+        }
+
+        public void InsertContactPerson(Purchaser pur, Person p)
+        {
+            PersonDAO personDAO = new PersonDAO();
+            p=personDAO.Insert(p);
+            pur.ContactPerson = p;
+            Update(pur);
+        }
+
+        public void UpdateContactPerson(Person p)
+        {
+            PersonDAO personDAO = new PersonDAO();
+            p=personDAO.Update(p);
+        }
+        
+
+ 
+    }
+}

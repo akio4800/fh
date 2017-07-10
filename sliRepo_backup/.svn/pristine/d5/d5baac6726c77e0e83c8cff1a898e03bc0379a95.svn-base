@@ -1,0 +1,448 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using SelvesSoftware.BusinessLogic;
+using SelvesSoftware.DataContainer;
+using SelvesSoftware.GUI.Elemente;
+using SelvesSoftware.GUI.Personenverwaltung.AG.Windows;
+using System.Collections.ObjectModel;
+using System.Media;
+
+namespace SelvesSoftware.GUI
+{
+    /// <summary>
+    /// Interaktionslogik für AGBearbeiten.xaml
+    /// </summary>
+    public partial class AgBearbeiten : Page
+    {
+        private IPurchaserDataBl _bl;
+        public IPurchaserDataBl bl
+        {
+            get
+            {
+                if (_bl == null)
+                {
+                    _bl = new PurchaserDataBl();
+                }
+                return _bl;
+            }
+            set
+            {
+                _bl = value;
+            }
+        }
+        private PurchaserData purData;
+        //List with always actual PA
+        public List<PersonalAssistant> employedPA = new List<PersonalAssistant>();
+        public ObservableCollection<Track> guiListEmployed = new ObservableCollection<Track>();
+        private bool load = true;
+      
+
+        public class Track
+        {
+            private String _fn;
+            private String _ln;
+            private long _id;
+            
+            public String Firstname
+            {
+                get { return _fn; }
+                set { _fn = value; }
+            }
+            public String Lastname
+            {
+                get { return _ln; }
+                set { _ln = value; }
+            }
+            public long Id
+            {
+                get { return _id; }
+                set { _id = value; }
+            }
+
+            public String Name
+            {
+                get
+                {
+                    return Firstname + " " + Lastname;
+                }
+            }
+
+            public Track(long id, String firstname, String lastname)
+            {
+                Firstname = firstname;
+                Lastname = lastname;
+                Id = id;
+            }         
+        }
+        public AgBearbeiten()
+        {
+              
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (window.GetType() == typeof(Main))
+                {
+                    (window as Main).windowHeader.Content = "AUFTRAGGEBER BEARBEITEN";
+
+
+                }
+            }
+            InitializeComponent();
+            CareAllowence.Items.Add("0");
+            CareAllowence.Items.Add("1");
+            CareAllowence.Items.Add("2");
+            CareAllowence.Items.Add("3");
+            CareAllowence.Items.Add("4");
+            CareAllowence.Items.Add("5");
+            CareAllowence.Items.Add("6");
+            CareAllowence.Items.Add("7");
+            var a = App.Current as App;
+            Console.WriteLine(a.AGIndex);
+          
+            if (a.AGIndex != 0)
+            {
+
+                getPurchaser();
+
+            }
+            load = false;
+        }
+        private void activeRadioBtn_Checked(object sender, RoutedEventArgs e)
+        {
+            if (load == false )
+            {
+                if (activeRadioBtn.IsChecked == false)
+                {
+
+                    //popup machen
+                    switch (MessageBox.Show(
+                        "Wollen Sie diese Person wirklich aktiv setzen?", "Achtung!",
+                        MessageBoxButton.YesNo, MessageBoxImage.Question))
+                    {
+                        case MessageBoxResult.No:
+
+                            break;
+                        case MessageBoxResult.Yes:
+
+                            break;
+
+                    }
+                }
+                }
+        }
+
+        private void inactiveRadioBtn_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!load)
+            {
+                //popup machen
+                switch (MessageBox.Show("Wollen Sie diese Person wirklich inaktiv setzen?",
+                "Achtung!",
+                MessageBoxButton.YesNo, MessageBoxImage.Question))
+                {
+                    case MessageBoxResult.No:
+                        inactiveRadioBtn.IsChecked = false;
+                        activeRadioBtn.IsChecked = true;
+
+                        break;
+                    case MessageBoxResult.Yes:
+
+                        break;
+
+                }
+
+            }
+        }
+
+        private void getPurchaser()
+        {
+            var a = App.Current as App;
+            int AGidx = ((int)(a.AGIndex));
+
+
+            purData = bl.SelectPurchaser(AGidx);
+            fillFields(purData);
+        }
+
+        private void fillFields(PurchaserData pd)
+        {
+            FirstName.Text = pd.Purchaser.FirstName;
+            LastName.Text = pd.Purchaser.LastName;
+            Email.Text = pd.Purchaser.EMail;
+            PhoneNr.Text = pd.Purchaser.PhoneNumber;
+            MobileNr.Text = pd.Purchaser.MobilePhone;
+            SVN.Text = pd.Purchaser.SVN.ToString();
+            Street.Text = pd.Purchaser.HomeAdress.Street;
+            HNr.Text = pd.Purchaser.HomeAdress.HouseNumber.ToString();
+            Etage.Text = pd.Purchaser.HomeAdress.Etage.ToString();
+            StairNr.Text = pd.Purchaser.HomeAdress.StairNumber.ToString();
+            DoorNr.Text = pd.Purchaser.HomeAdress.DoorNumber.ToString();
+            City.Text = pd.Purchaser.HomeAdress.City;
+            Country.Text = pd.Purchaser.HomeAdress.Country;
+            ZIP.Text = pd.Purchaser.HomeAdress.ZipCode.ToString();
+            nationality.Text = pd.Purchaser.nationality;
+            EntryDate.Text = pd.Purchaser.EntryDate.ToString();
+            ApprovelFrom.Text = pd.Purchaser.ApprovalBegin.ToString();
+            ApprovelTo.Text = pd.Purchaser.ApprovalEnd.ToString();
+            PayperHour.Text = pd.HourlyRate.ToString();
+            KmPay.Text = pd.TravellingAllowanceKM.ToString();
+            billablePayperHour.Text = pd.HourlyRatePayoff.ToString();
+            Needof.Text = pd.AssistenceDemand.ToString();
+            Income.Text = pd.Income.ToString();
+
+
+            IncomeBetrag.Text = pd.InputIncome.ToString();
+            CareAllowence.Text = pd.CareAllowance.ToString();
+            districtcommission.Text = pd.Purchaser.DistrictCommision;
+
+            IBAN.Text = pd.Purchaser.IBAN;
+            BIC.Text = pd.Purchaser.BIC;
+            kontoinhaber.Text = pd.Purchaser.AccountHolder;
+
+            if (pd.Purchaser.Active)
+            {
+                activeRadioBtn.IsChecked = true;
+                inactiveRadioBtn.IsChecked = false;
+            }
+            else
+            {
+                activeRadioBtn.IsChecked = false;
+                inactiveRadioBtn.IsChecked = true;
+            }
+
+            if (pd.Purchaser.hasContract)
+            {
+
+                contract.IsChecked = true;
+
+            }
+            if (pd.Purchaser.hasIntroCourse)
+            {
+                einfuehrungskurs.IsChecked = true;
+            }
+            employedPA.Clear();
+            guiListEmployed.Clear();
+            employedPersonalAssistants.ItemsSource = guiListEmployed;
+  
+            if (pd.Purchaser.Employees != null)
+            {
+                foreach (EmploymentStatus emp in pd.Purchaser.Employees)
+                {
+                    employedPA.Add(emp.Assistant);
+                    
+                    guiListEmployed.Add(new Track(emp.Assistant.Id, emp.Assistant.FirstName, emp.Assistant.LastName));
+
+                }
+                employedPersonalAssistants.ItemsSource = guiListEmployed;
+
+            }
+        }
+
+        
+
+        public long parseLong(String s)
+        {
+            if (s != null)
+            {
+                return long.Parse(s);
+            }
+            return 0;
+        }
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            fillFields(purData);
+            //DIRTY
+            InputEvaluator ie = new InputEvaluator();
+            ie.Evaluate(this);
+            FirstName.Background = Brushes.White;
+            LastName.Background = Brushes.White;
+        }
+
+        private void PAHinzufügen_Click(object sender, RoutedEventArgs e)
+        {
+            PAAuswählen paaus = new PAAuswählen(this);
+            paaus.Show();
+        }
+
+
+        public int parseInt(String s)
+        {
+            if (s != null)
+            {
+                return int.Parse(s);
+            }
+            return 0;
+        }
+
+        public decimal parseDecimal(String s)
+        {
+            if (s != null)
+            {
+                return decimal.Parse(s);
+            }
+            return 0;
+        }
+
+        public double parseDouble(String s)
+        {
+            if (s != null)
+            {
+                return double.Parse(s);
+            }
+            return 0;
+        }
+
+        private void save_Click(object sender, RoutedEventArgs e)
+        {
+            Purchaser pur = new Purchaser();
+            purData = new PurchaserData();
+            pur.HomeAdress = new Adress();
+            InputEvaluator ie = new InputEvaluator();
+
+
+            if (ie.Evaluate(this))
+            {
+
+                pur.FirstName = FirstName.getContent();
+                pur.LastName = LastName.getmustContent();
+                pur.EMail = Email.getContent();
+                if (PhoneNr.getContent() != null)
+                {
+                    pur.PhoneNumber = PhoneNr.getContent();
+                }
+                if (MobileNr.getContent() != null)
+                {
+                    pur.MobilePhone = MobileNr.getContent();
+                }
+                pur.HomeAdress.Street = Street.getContent();
+                pur.HomeAdress.StairNumber = parseInt(StairNr.getContent());
+                pur.HomeAdress.HouseNumber = parseInt(HNr.getContent());
+                pur.HomeAdress.Etage = parseInt(Etage.getContent());
+                pur.HomeAdress.DoorNumber = parseInt(DoorNr.getContent());
+                pur.HomeAdress.City = City.getContent();
+                pur.HomeAdress.Country = Country.getContent();
+                pur.HomeAdress.ZipCode = parseInt(ZIP.getContent());
+                pur.EntryDate = EntryDate.DisplayDate;
+                pur.ApprovalBegin = ApprovelFrom.DisplayDate;
+                pur.ApprovalEnd = ApprovelTo.DisplayDate;
+                purData.HourlyRate = parseDecimal(PayperHour.getContent());
+                purData.TravellingAllowanceKM = parseDecimal(KmPay.getContent());
+                purData.HourlyRatePayoff = parseDecimal(billablePayperHour.getContent());
+                purData.Income = parseDecimal(Income.getContent());
+                purData.AssistenceDemand = parseInt(Needof.getContent());
+                purData.InputIncome = parseDecimal(IncomeBetrag.getContent());
+                purData.CareAllowance = parseInt((string)CareAllowence.SelectedValue);
+
+                foreach (EmploymentStatus emp in purData.Purchaser.Employees)
+                {
+                    bool found = false;
+                    foreach (PersonalAssistant pa in employedPA)
+                    {
+                        if (pa.Id.Equals(emp.Assistant.Id))
+                        {
+                            found = true;
+                        }
+                    }
+                    if (found)
+                    {
+                        pur.Employees.Add(emp);
+                    }
+                }
+
+                //AKTIV RADIO BOXEN NAMEN
+
+                //switch to Übersicht
+                foreach (Window window in Application.Current.Windows)
+                {
+                    if (window.GetType() == typeof(Main))
+                    {
+                        (window as Main).FrameÜbersicht.Source = new Uri("../Personenverwaltung/AG/AGÜbersicht.xaml", UriKind.Relative);
+
+
+                    }
+                }
+
+            }
+
+            purData.Purchaser = pur;
+            if (pur.FirstName != null && pur.LastName != null)
+            {
+                _bl.UpdatePurchaser(purData);
+            }
+
+
+
+        }
+
+        private void deletePA_Click(object sender, RoutedEventArgs e)
+        {
+            /* SystemSounds.Asterisk.Play();
+             switch (MessageBox.Show("Wollen Sie diesen Eintrag wirklich löschen?",
+                         "Achtung!", MessageBoxButton.YesNo, MessageBoxImage.Question))
+             {
+                 case MessageBoxResult.No:
+
+                     break;
+                 case MessageBoxResult.Yes:
+
+                     Track t = (Track)employedPersonalAssistants.SelectedItem;
+
+
+                     int indexDelete = 0;
+                     for (int i = 0; i < employedPA.Count; ++i)
+                     {
+                         if (employedPA[i].Id==t.Id)
+                         {
+                             indexDelete = i;
+                         }
+
+                     }
+
+                     employedPA.RemoveAt(indexDelete);
+                     guiListEmployed.Remove(t);
+                     employedPersonalAssistants.ItemsSource = guiListEmployed;
+                     break;
+
+             }
+             */
+        }
+
+        private void CareAllowence_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (CareAllowence.SelectedIndex != purData.CareAllowance)
+            {
+                SystemSounds.Asterisk.Play();
+                switch (MessageBox.Show("Wollen Sie wirklich die Pflegestufe ändern?",
+                    "Achtung!",
+                    MessageBoxButton.YesNo, MessageBoxImage.Question))
+                {
+                    case MessageBoxResult.No:
+                        CareAllowence.SelectedIndex = purData.CareAllowance;
+                        break;
+                    case MessageBoxResult.Yes:
+
+                        break;
+
+                }
+            }
+            
+        }
+
+  
+    }
+}
+
+
+
+

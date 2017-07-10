@@ -1,0 +1,301 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using SelvesSoftware.GUI.Personenverwaltung.PA.Windows;
+using SelvesSoftware.BusinessLogic;
+using System.Media;
+using SelvesSoftware.DataContainer;
+
+namespace SelvesSoftware.GUI.Personenverwaltung.PA
+{
+    /// <summary>
+    /// Interaktionslogik für PAHinzufügen.xaml
+    /// </summary>
+    public partial class PaHinzufügen : Page
+    {
+        IPersonalAssistentBl _bl;
+        public IPersonalAssistentBl bl
+        {
+            get
+            {
+                if (_bl == null)
+                {
+                    _bl = new PersonalAssistentBl();
+                }
+                return _bl;
+            }
+            set
+            {
+                _bl = value;
+            }
+        }
+        public PaHinzufügen()
+        {
+           
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (window.GetType() == typeof(Main))
+                {
+                    (window as Main).windowHeader.Content = "PERSÖNLICHEN ASSISTENTEN HINZUFÜGEN";
+
+
+                }
+            }
+            InitializeComponent();
+            deleteAG.IsEnabled = false;
+            DienstEntfernen.IsEnabled = false;
+        }
+
+        public PersonalAssistant pa {
+            get; set; }
+
+        public List<Purchaser> employedPurchasers = new List<Purchaser>();
+
+        public List<Employment> employmentList = new List<Employment>();
+
+        private void DienstHinzugfügen_Click(object sender, RoutedEventArgs e)
+        {
+            DienstHinzufügen d = new DienstHinzufügen(this);
+            d.Show();
+        }
+
+        private void DienstEntfernen_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        private void AGHinzufügen_Click(object sender, RoutedEventArgs e)
+        {
+            AGAuswählen a = new AGAuswählen(this);
+            a.Show();
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            InputEvaluator ie = new InputEvaluator();
+            _bl = new PersonalAssistentBl();
+            bool save = true;
+
+            if (doubles())
+            {
+                SystemSounds.Asterisk.Play();
+                switch (MessageBox.Show("Es existiert bereits ein Persönlicher Assistent mit diesem Namen. Soll er wirklich hinzugefügt werden?",
+                    "Achtung!",
+                    MessageBoxButton.YesNo, MessageBoxImage.Question))
+                {
+                    case MessageBoxResult.No:
+                        save = false;
+                        break;
+                    case MessageBoxResult.Yes:
+                        break;
+                }
+            }
+
+                if (save)
+                {
+                    if (ie.Evaluate(this))
+                    {
+                        PersonalAssistant pa = new PersonalAssistant();
+                        pa.HomeAdress = new Adress();
+                        pa.HomeAdress.Street = Street.getContent();
+                        pa.HomeAdress.HouseNumber = parseInt(HNr.getContent());
+                        pa.HomeAdress.Etage = parseInt(Etage.getContent());
+                        pa.HomeAdress.StairNumber = parseInt(StairNr.getContent());
+                        pa.HomeAdress.DoorNumber = parseInt(DoorNr.getContent());
+                        pa.HomeAdress.City = City.getContent();
+                        pa.HomeAdress.ZipCode = parseInt(ZIP.getContent());
+                        pa.HomeAdress.Country = Country.getContent();
+                        pa.nationality = nationality.getContent();
+
+                        pa.FirstName = FirstName.getContent();
+                        pa.LastName = LastName.getContent();
+                        pa.EMail = Email.getContent();
+                        pa.PhoneNumber = PhoneNr.getContent();
+                        pa.MobilePhone = MobileNr.getContent();
+                        pa.SVN = parseLong(SVN.getContent());
+                        // TODO add document date
+
+                        pa.IBAN = IBAN.getContent();
+                        pa.BIC = BIC.getContent();
+                        pa.AccountHolder = kontoinhaber.getContent();
+
+                        pa.SV = ((bool)SV.IsChecked) ? (true) : false;
+                        pa.Dienstvertrag = ((bool)Dienstvertrag.IsChecked) ? (true) : false;
+                        pa.BestBH = ((bool)BestätigungBH.IsChecked) ? (true) : false;
+                        pa.Grundkurs = ((bool)Grundkurs.IsChecked) ? (true) : false;
+
+                        pa.Purchasers = new List<Purchaser>();
+                        pa.EmploymentTimes = this.employmentList;
+                        if ((bool)activeRadioButton.IsChecked)
+                        {
+                            pa.Active = true;
+                        }
+                        foreach (Purchaser pur in employedPurchasers)
+
+                        {
+                            pa.Purchasers.Add(pur);
+                        }
+                        _bl.CreatePa(pa);
+                    //switch to Übersicht
+                    foreach (Window window in Application.Current.Windows)
+                    {
+                        if (window.GetType() == typeof(Main))
+                        {
+                            (window as Main).FrameÜbersicht.Source = new Uri("../Personenverwaltung/PA/PAÜbersicht.xaml", UriKind.Relative);
+
+
+                        }
+                    }
+                }
+                
+                foreach (Window window in Application.Current.Windows)
+                {
+                    if (window.GetType() == typeof(Main))
+                    {
+                        (window as Main).FrameÜbersicht.Source = new Uri("../Personenverwaltung/PA/PAÜbersicht.xaml", UriKind.Relative);
+
+
+                    }
+                }
+            }
+        }
+
+        public long parseLong(String s)
+        {
+            if (s != null)
+            {
+                
+                return long.Parse(s);
+            }
+            return 0;
+        }
+        public int parseInt(String s)
+        {
+            if (s != null)
+            {
+                return int.Parse(s);
+            }
+            return 0;
+        }
+
+        private bool doubles()
+        {
+            List<PersonalAssistant> assistents = bl.SelectAllPa();
+            foreach (PersonalAssistant pa in assistents)
+            {
+                if (pa.FirstName.Equals(FirstName.getContent()) && pa.LastName.Equals(LastName.getContent()))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public decimal parseDecimal(String s)
+        {
+            if (s != null)
+            {
+                return decimal.Parse(s);
+            }
+            return 0;
+        }
+
+        public double parseDouble(String s)
+        {
+            if (s != null)
+            {
+                return double.Parse(s);
+            }
+            return 0;
+        }
+
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            clearFields();
+            //DIRTY
+            InputEvaluator ie = new InputEvaluator();
+            ie.Evaluate(this);
+            FirstName.Background = Brushes.White;
+            LastName.Background = Brushes.White;
+        }
+
+        private void clearFields()
+        {
+            FirstName.Text = "";
+            LastName.Text = "";
+            Email.Text = "";
+            PhoneNr.Text = "";
+            MobileNr.Text = "";
+            SVN.Text = "";
+            Street.Text = "";
+            HNr.Text = "";
+            Etage.Text = "";
+            StairNr.Text = "";
+            DoorNr.Text = "";
+            City.Text = "";
+            Country.Text = "";
+            ZIP.Text = "";
+            nationality.Text = "";
+            IBAN.Text = "";
+            BIC.Text = "";
+            kontoinhaber.Text = "";
+            AGListe.Items.Clear();
+            documentDate.Clear();
+            activeRadioButton.IsChecked = true;
+            inactiveRadioButton.IsChecked = false;
+            employedPurchasers.Clear();
+            employments.Items.Clear();
+        }
+
+        private void AGEntfernen_Click(object sender, RoutedEventArgs e)
+        {
+            SystemSounds.Asterisk.Play();
+            switch (MessageBox.Show("Wollen Sie diesen Eintrag wirklich löschen?",
+                "Achtung!",
+                MessageBoxButton.YesNo, MessageBoxImage.Question))
+            {
+                case MessageBoxResult.No:
+                    
+                    break;
+                case MessageBoxResult.Yes:
+                    String AG = AGListe.SelectedItem as String;
+                    string[] names = AG.Split(new Char[] { ' ' });
+                    int indexDelete = 0;
+                    for(int i = 0; i < employedPurchasers.Count;++i)
+                    {
+                        if(employedPurchasers[i].FirstName.Equals(names[0]) && employedPurchasers[i].LastName.Equals(names[1]))
+                        {
+                            indexDelete = i;
+                        }
+                        
+                    }
+                    employedPurchasers.RemoveAt(indexDelete);
+                    AGListe.Items.RemoveAt(indexDelete);
+                    break;
+
+            }
+
+        }
+
+        private void AGListe_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            deleteAG.IsEnabled = true;
+            
+        }
+
+        private void employments_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            DienstEntfernen.IsEnabled = true;
+        }
+    }
+}

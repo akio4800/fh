@@ -1,0 +1,252 @@
+﻿using SelvesSoftware.BusinessLogic;
+using SelvesSoftware.GUI.Personenverwaltung.PA.Windows;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Media;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+
+namespace SelvesSoftware.GUI.Personenverwaltung.PA
+{
+    /// <summary>
+    /// Interaktionslogik für PABearbeiten.xaml
+    /// </summary>
+    public partial class PaBearbeiten : Page
+    {
+        IPersonalAssistentBl _bl;
+        public IPersonalAssistentBl bl
+        {
+            get
+            {
+                if (_bl == null)
+                {
+                    _bl = new PersonalAssistentBl();
+                }
+                return _bl;
+            }
+            set
+            {
+                _bl = value;
+            }
+        }
+        public List<Purchaser> employedPurchasers = new List<Purchaser>();
+        private PersonalAssistant pa;
+        public List<Employment> employmentList = new List<Employment>();
+
+        private ObservableCollection<Track> guiListEmployed = new ObservableCollection<Track>();
+
+        public class Track
+        {
+            private String _fn;
+            private String _ln;
+            private long _id;
+
+            public String Firstname
+            {
+                get { return _fn; }
+                set { _fn = value; }
+            }
+            public String Lastname
+            {
+                get { return _ln; }
+                set { _ln = value; }
+            }
+            public long Id
+            {
+                get { return _id; }
+                set { _id = value; }
+            }
+
+            public String Name
+            {
+                get
+                {
+                    return Firstname + " " + Lastname;
+                }
+            }
+
+            public Track(long id, String firstname, String lastname)
+            {
+                Firstname = firstname;
+                Lastname = lastname;
+                Id = id;
+            }
+        }
+
+        public PaBearbeiten()
+        {
+            
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (window.GetType() == typeof(Main))
+                {
+                    (window as Main).windowHeader.Content = "PERSÖNLICHEN ASSISTENTEN BEARBEITEN";
+
+
+                }
+            }
+            InitializeComponent();
+            getAssistant();
+        }
+
+        private void getAssistant()
+        {
+
+            var a = App.Current as App;
+            pa = bl.SelectPa((int)a.PAIndex);
+
+            FirstName.Text = pa.FirstName;
+            LastName.Text = pa.LastName;
+            MobileNr.Text = pa.MobilePhone;
+            PhoneNr.Text = pa.PhoneNumber;
+            Email.Text = pa.EMail;
+            SVN.Text = pa.SVN.ToString();
+            Street.Text = pa.HomeAdress.Street;
+            Country.Text = pa.HomeAdress.Country;
+            HNr.Text = pa.HomeAdress.HouseNumber.ToString();
+            DoorNr.Text = pa.HomeAdress.DoorNumber.ToString();
+            Etage.Text = pa.HomeAdress.Etage.ToString();
+            StairNr.Text = pa.HomeAdress.StairNumber.ToString();
+            City.Text = pa.HomeAdress.City;
+            ZIP.Text = pa.HomeAdress.ZipCode.ToString();
+            nationality.Text = pa.nationality;
+
+            if (pa.ClosingDateDocuments != null) { documentDate.Text = pa.ClosingDateDocuments.Value.ToShortDateString(); }
+
+
+
+            IBAN.Text = pa.IBAN;
+            BIC.Text = pa.BIC;
+            kontoinhaber.Text = pa.AccountHolder;
+
+
+            activeRadioBtn.IsChecked = pa.Active;
+            inactiveRadioBtn.IsChecked = !pa.Active;
+
+            SV.IsChecked = pa.SV;
+            Dienstvertrag.IsChecked = pa.Dienstvertrag;
+            BestätigungBH.IsChecked = pa.BestBH;
+            Grundkurs.IsChecked = pa.Grundkurs;
+
+            if (pa.EmploymentTimes != null)
+            {
+                foreach (Employment e in pa.EmploymentTimes)
+                {
+                    String pd;
+                    if (e.EmplEnd.Year != 1)
+                    {
+                        pd = e.EmplBegin.ToShortDateString() + " - " + e.EmplEnd.ToShortDateString();
+                    }
+                    else
+                    {
+                        pd = e.EmplBegin.ToShortDateString();
+                    }
+                    AGListe.Items.Add(pd);
+                }
+            }
+            
+
+            if (pa.Purchasers != null)
+            {
+                foreach (Purchaser p in pa.Purchasers)
+                {
+                    String pd = p.LastName + " " + p.FirstName;
+                    guiListEmployed.Add(new Track(p.Id, p.FirstName, p.LastName));
+                }
+                AGListe.Items.Clear();
+                AGListe.ItemsSource = guiListEmployed;
+            }
+            
+        }
+
+        private void DienstHinzugfügen_Click(object sender, RoutedEventArgs e)
+        {
+            DienstHinzufügen d = new DienstHinzufügen(this);
+            d.Show();
+        }
+
+        private void DienstEntfernen_Click(object sender, RoutedEventArgs e)
+        {
+            SystemSounds.Asterisk.Play();
+        }
+
+        private void RadioButton_Checked(object sender, RoutedEventArgs e)
+        {
+            //popup machen
+            switch (MessageBox.Show("Wollen Sie diese Person wirklich inaktiv setzen?",
+                "Achtung!",
+                MessageBoxButton.YesNo, MessageBoxImage.Question))
+            {
+                case MessageBoxResult.No:
+                    inactiveRadioBtn.IsChecked = false;
+                    activeRadioBtn.IsChecked = true;
+                    break;
+                case MessageBoxResult.Yes:
+                    break;
+
+            }
+        }
+
+        private void AGentfernen_Click(object sender, RoutedEventArgs e)
+        {
+            SystemSounds.Asterisk.Play();
+            switch (MessageBox.Show("Wollen Sie diesen Eintrag wirklich löschen?",
+                "Achtung!",
+                MessageBoxButton.YesNo, MessageBoxImage.Question))
+            {
+                case MessageBoxResult.No:
+
+                    break;
+                case MessageBoxResult.Yes:
+                    String AG = AGListe.SelectedItem as String;
+                    string[] names = AG.Split(new Char[] { ' ' });
+                    int indexDelete = 0;
+                    for (int i = 0; i < employedPurchasers.Count; ++i)
+                    {
+                        if (employedPurchasers[i].FirstName.Equals(names[0]) && employedPurchasers[i].LastName.Equals(names[1]))
+                        {
+                            indexDelete = i;
+                        }
+
+                    }
+                    employedPurchasers.RemoveAt(indexDelete);
+                    AGListe.Items.RemoveAt(indexDelete);
+                    break;
+
+            }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            guiListEmployed.Clear();
+            employments.Items.Clear();
+            
+            getAssistant();
+        }
+
+ 
+        private void Speichern_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (window.GetType() == typeof(Main))
+                {
+                    (window as Main).FrameÜbersicht.Source = new Uri("../Personenverwaltung/PA/PAÜbersicht.xaml", UriKind.Relative);
+
+
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,563 @@
+﻿using System;
+using System.Data.SqlClient;
+using System.Data;
+using System.Text;
+using Npgsql;
+using System.Collections.Generic;
+using SelvesSoftware.DataContainer;
+using System.Windows;
+
+namespace SelvesSoftware.DB
+{
+    //-----------------------------------------------------------------------------------------------------
+    /// <summary>
+    /// author: TS
+    /// </summary>
+
+    //-----------------------------------------------------------------------------------------------------
+    public class PersonalAssistantDAO : IPersonalAssistantDAO
+    {
+        //-----------------------------------------------------------------------------------------------------
+        public PersonalAssistantDAO()
+        {
+
+        }
+
+        //-----------------------------------------------------------------------------------------------------
+        public PersonalAssistant select(PersonalAssistant pa)
+        {
+
+            //TODO EXCEPTION PERSON NOT FOUND
+
+            Person p = new Person();
+            p.Id = pa.Id;
+            PersonDAO pdao = new PersonDAO();
+            pdao.Select(p);
+
+            pa = new PersonalAssistant(p);
+
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+
+
+
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "SELECT * FROM Persoenlicherassistent p WHERE p.paid=@id";
+
+            DB.DBConnector.AddToCommand("@id", NpgsqlTypes.NpgsqlDbType.Integer, command, pa.Id);
+
+            NpgsqlDataReader reader = command.ExecuteReader();
+
+            reader.Read();
+            fillPA(pa, reader);
+            reader.Close();
+
+            command = new NpgsqlCommand(null, con);
+            command.CommandText = "Select * from dienst where paid=@id";
+            DB.DBConnector.AddToCommand("@id", NpgsqlTypes.NpgsqlDbType.Integer, command, pa.Id);
+            reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                Employment e = new Employment();
+                if (!reader.IsDBNull(0))
+                {
+                    e.EmplBegin = reader.GetDateTime(0);
+                }
+                if (!reader.IsDBNull(1))
+                {
+                    e.EmplId = reader.GetInt32(1);
+                }
+                if (!reader.IsDBNull(2))
+                {
+                    e.EmplEnd = reader.GetDateTime(2);
+                }
+                if (pa.EmploymentTimes == null)
+                {
+                    pa.EmploymentTimes = new List<Employment>();
+                }
+
+                pa.EmploymentTimes.Add(e);
+            }
+
+            pa.Purchasers = SelectPurchasers(pa);
+
+            con = DB.DBConnector.GetConnection();
+
+            command = new NpgsqlCommand(null, con);
+
+            command.CommandText = "Select * from dokumente where paid=@id";
+            DB.DBConnector.AddToCommand("@id", NpgsqlTypes.NpgsqlDbType.Integer, command, pa.Id);
+            try
+            {
+                reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    Document d = new Document();
+                    if (!reader.IsDBNull(0))
+                    {
+                        d.DocumentName = reader.GetString(0);
+                    }
+                    if (!reader.IsDBNull(1))
+                    {
+                        d.Date = reader.GetDateTime(1);
+                    }
+                    if (!reader.IsDBNull(3))
+                    {
+                        d.FilePath = reader.GetString(3);
+                    }
+                    if (!reader.IsDBNull(4))
+                    {
+                        d.Required = reader.GetBoolean(4);
+                    }
+                    if (pa.Documents == null)
+                    {
+                        pa.Documents = new List<Document>();
+                    }
+                    pa.Documents.Add(d);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.Write(e.Message);
+            }
+
+            con.Close();
+            return pa;
+
+        }
+
+        public List<Purchaser> SelectPurchasers(PersonalAssistant p)
+        {
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+
+
+
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "SELECT * FROM Dienstverhaeltnis p WHERE p.paid=@id";
+
+            DB.DBConnector.AddToCommand("@id", NpgsqlTypes.NpgsqlDbType.Integer, command, p.Id);
+
+            NpgsqlDataReader reader = command.ExecuteReader();
+            List<int> purIds = new List<int>();
+            while (reader.Read())
+            {
+                if (!reader.IsDBNull(0))
+                {
+                    purIds.Add(reader.GetInt32(0));
+                }
+            }
+            reader.Close();
+            con.Close();
+
+            PurchaserDAO purDAO = new PurchaserDAO();
+            p.Purchasers = new List<Purchaser>();
+            foreach (int i in purIds)
+            {
+                Purchaser pur = new Purchaser();
+                pur.Id = i;
+                pur = purDAO.Select(pur);
+                EmploymentStatus empStatus = new EmploymentStatus();
+                empStatus.Assistant = p;
+                empStatus.Purchaser = pur;
+                p.Purchasers.Add(pur);
+            }
+
+            return p.Purchasers;
+        }
+
+        //-----------------------------------------------------------------------------------------------------
+        public PersonalAssistant insert(PersonalAssistant person)
+        {
+
+            PersonDAO personDao = new PersonDAO();
+            Person pa = personDao.Insert(person); //returns inserted person with the new ID
+            person.Id = pa.Id;
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+
+
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "INSERT INTO persoenlicherassistent (paid,aktiv,abgabedatumunterlagen,SV,Dienstvertrag,BestaetigungBH,Grundkurs) VALUES (@paid,@aktiv,@datumunterlagen,@SV,@Dienstvertrag,@BH,@Grundkurs)";
+            //command.CommandText = "INSERT INTO persoenlicherassistent (paid,aktiv) VALUES (@paid,@aktiv)";
+
+            DB.DBConnector.AddToCommand("@paid", NpgsqlTypes.NpgsqlDbType.Numeric, command, person.Id);
+            DB.DBConnector.AddToCommand("@aktiv", NpgsqlTypes.NpgsqlDbType.Boolean, command, person.Active);
+            DB.DBConnector.AddToCommand("@datumunterlagen", NpgsqlTypes.NpgsqlDbType.Date, command, person.ClosingDateDocuments);
+            DB.DBConnector.AddToCommand("@SV", NpgsqlTypes.NpgsqlDbType.Boolean, command, person.SV);
+            DB.DBConnector.AddToCommand("@Dienstvertrag", NpgsqlTypes.NpgsqlDbType.Boolean, command, person.Dienstvertrag);
+            DB.DBConnector.AddToCommand("@BH", NpgsqlTypes.NpgsqlDbType.Boolean, command, person.BestBH);
+            DB.DBConnector.AddToCommand("@Grundkurs", NpgsqlTypes.NpgsqlDbType.Boolean, command, person.Grundkurs);
+
+            try { command.ExecuteNonQuery(); } catch (Exception e) { MessageBox.Show(e.Message.ToString(), "Error"); }
+            con.Close();
+            PersonalAssistant personOld = new PersonalAssistant();
+            personOld.Id = person.Id;
+            this.select(personOld);
+            if (person.EmploymentTimes != null)
+            {
+                foreach (Employment e in person.EmploymentTimes)
+                {
+                    bool needs_insert = true;
+
+                    e.EmplId = pa.Id;
+                    if(e.EmplEnd.Year == 1)
+                    {
+
+                    }
+
+                    if (personOld.EmploymentTimes != null)
+                    {
+                        foreach (Employment e2 in personOld.EmploymentTimes)
+                        {
+                            if (e.EmplBegin == e2.EmplBegin)
+                            {
+                                needs_insert = false;
+                            }
+
+
+                        }
+                    }
+
+                    if (needs_insert) { insertEmployment(e); };
+                }
+            }
+
+            return person;
+        }
+        public void insertEmployment(Employment e)
+        {
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "INSERT INTO dienst VALUES (@begin,@paid,@ende)";
+
+            DB.DBConnector.AddToCommand("@paid", NpgsqlTypes.NpgsqlDbType.Integer, command, e.EmplId);
+            DB.DBConnector.AddToCommand("@begin", NpgsqlTypes.NpgsqlDbType.Date, command, e.EmplBegin);
+
+            DB.DBConnector.AddToCommand("@ende", NpgsqlTypes.NpgsqlDbType.Date, command, e.EmplEnd);
+
+            try { command.ExecuteNonQuery(); } catch (Exception ex) { MessageBox.Show(ex.Message.ToString(), "Error"); }
+
+            con.Close();
+
+        }
+        public void updateEmployment(PersonalAssistant person)
+        {
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+
+
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "UPDATE dienst SET (Ende=@ende)WHERE paid=@paid AND beginn=@begin";
+
+            DB.DBConnector.AddToCommand("@paid", NpgsqlTypes.NpgsqlDbType.Integer, command, person.Id);
+            DB.DBConnector.AddToCommand("@begin", NpgsqlTypes.NpgsqlDbType.Date, command, person.EmploymentTimes[person.EmploymentTimes.Count - 1].EmplBegin);
+            DB.DBConnector.AddToCommand("@ende", NpgsqlTypes.NpgsqlDbType.Date, command, person.EmploymentTimes[person.EmploymentTimes.Count - 1].EmplEnd);
+
+            try { command.ExecuteNonQuery(); } catch (Exception e) { MessageBox.Show(e.Message.ToString(), "Error"); }
+
+            con.Close();
+        }
+
+        //-----------------------------------------------------------------------------------------------------
+        public PersonalAssistant update(PersonalAssistant person)
+        {
+            PersonDAO pdao = new PersonDAO();
+            pdao.Update(person);
+
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+
+
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "UPDATE persoenlicherassistent SET aktiv=@aktiv,abgabedatumunterlagen=@datumunterlagen,SV=@SV,Dienstvertrag=@Dienstvertrag,BestaetigungBH=@BH,Grundkurs=@Grundkurs WHERE paid=@paid";
+            //command.CommandText = "UPDATE persoenlicherassistent SET aktiv=@aktiv WHERE paid=@paid";
+
+
+            DB.DBConnector.AddToCommand("@paid", NpgsqlTypes.NpgsqlDbType.Numeric, command, person.Id);
+            DB.DBConnector.AddToCommand("@aktiv", NpgsqlTypes.NpgsqlDbType.Boolean, command, person.Active);
+            DB.DBConnector.AddToCommand("@datumunterlagen", NpgsqlTypes.NpgsqlDbType.Date, command, person.ClosingDateDocuments);
+            DB.DBConnector.AddToCommand("@SV", NpgsqlTypes.NpgsqlDbType.Boolean, command, person.SV);
+            DB.DBConnector.AddToCommand("@Dienstvertrag", NpgsqlTypes.NpgsqlDbType.Boolean, command, person.Dienstvertrag);
+            DB.DBConnector.AddToCommand("@BH", NpgsqlTypes.NpgsqlDbType.Boolean, command, person.BestBH);
+            DB.DBConnector.AddToCommand("@Grundkurs", NpgsqlTypes.NpgsqlDbType.Boolean, command, person.Grundkurs);
+
+            try { command.ExecuteNonQuery(); } catch (Exception e) { MessageBox.Show(e.Message.ToString(), "Error"); }
+
+            con.Close();
+            return person;
+        }
+
+        public PersonalAssistant selectReduced(PersonalAssistant pa)
+        {
+            Person p = new Person();
+            p.Id = pa.Id;
+            PersonDAO pdao = new PersonDAO();
+            pdao.Select(p);
+
+            pa = new PersonalAssistant(p);
+
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+
+
+
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "SELECT * FROM Persoenlicherassistent p WHERE p.paid=@id";
+
+            DB.DBConnector.AddToCommand("@id", NpgsqlTypes.NpgsqlDbType.Integer, command, pa.Id);
+
+            NpgsqlDataReader reader = command.ExecuteReader();
+
+            reader.Read();
+            fillPA(pa, reader);
+            reader.Close();
+
+            command = new NpgsqlCommand(null, con);
+            command.CommandText = "Select * from dienst where paid=@id";
+            DB.DBConnector.AddToCommand("@id", NpgsqlTypes.NpgsqlDbType.Integer, command, pa.Id);
+            reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                Employment e = new Employment();
+                if (!reader.IsDBNull(0))
+                {
+                    e.EmplBegin = reader.GetDateTime(0);
+                }
+                if (!reader.IsDBNull(1))
+                {
+                    e.EmplId = reader.GetInt32(1);
+                }
+                if (!reader.IsDBNull(2))
+                {
+                    e.EmplEnd = reader.GetDateTime(2);
+                }
+                if (pa.EmploymentTimes == null)
+                {
+                    pa.EmploymentTimes = new List<Employment>();
+                }
+
+                pa.EmploymentTimes.Add(e);
+            }
+
+            command = new NpgsqlCommand(null, con);
+
+            command.CommandText = "Select * from dokumente where paid=@id";
+            DB.DBConnector.AddToCommand("@id", NpgsqlTypes.NpgsqlDbType.Integer, command, pa.Id);
+            reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                Document d = new Document();
+                if (!reader.IsDBNull(0))
+                {
+                    d.DocumentName = reader.GetString(0);
+                }
+                if (!reader.IsDBNull(1))
+                {
+                    d.Date = reader.GetDateTime(1);
+                }
+                if (!reader.IsDBNull(3))
+                {
+                    d.FilePath = reader.GetString(3);
+                }
+                if (!reader.IsDBNull(4))
+                {
+                    d.Required = reader.GetBoolean(4);
+                }
+                if (pa.Documents == null)
+                {
+                    pa.Documents = new List<Document>();
+                }
+                pa.Documents.Add(d);
+            }
+
+            con.Close();
+            return pa;
+        }
+
+        private void fillPA(PersonalAssistant pa, NpgsqlDataReader reader)
+        {
+            if (!reader.IsDBNull(0))
+            {
+                pa.Active = reader.GetBoolean(0);
+            }
+            if (!reader.IsDBNull(2))
+            {
+                pa.ClosingDateDocuments = reader.GetDateTime(2);
+            }
+            if (!reader.IsDBNull(3))
+            {
+                pa.SV = reader.GetBoolean(3);
+            }
+            if (!reader.IsDBNull(4))
+            {
+                pa.Dienstvertrag = reader.GetBoolean(4);
+            }
+            if (!reader.IsDBNull(5))
+            {
+                pa.BestBH = reader.GetBoolean(5);
+            }
+            if (!reader.IsDBNull(6))
+            {
+                pa.Grundkurs = reader.GetBoolean(6);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------
+        public List<PersonalAssistant> SelectAll()
+        {
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+
+
+
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "SELECT paid FROM Persoenlicherassistent order by aktiv DESC";
+            NpgsqlDataReader reader = command.ExecuteReader();
+
+            List<int> ids = new List<int>();
+            List<PersonalAssistant> pas = new List<PersonalAssistant>();
+            while (reader.Read())
+            {
+                ids.Add(reader.GetInt32(0));
+            }
+
+            con.Close();
+
+            foreach (int id in ids)
+            {
+                PersonalAssistant pa = new PersonalAssistant();
+                pa.Id = id;
+                pas.Add(this.select(pa));
+            }
+            return pas;
+
+        }
+        /// <summary>
+        /// ein neues Dokument kann eingefügt werden.
+        /// </summary>
+        /// <param name="pa"></param>
+        public void insertDocument(PersonalAssistant pa)
+        {
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+
+
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "INSERT INTO Dokumente VALUES (@name,@datum,@paid,@file,@erforderlich)";
+
+            DB.DBConnector.AddToCommand("@name", NpgsqlTypes.NpgsqlDbType.Varchar, command, pa.Documents[pa.Documents.Count - 1].DocumentName);
+            DB.DBConnector.AddToCommand("@datum", NpgsqlTypes.NpgsqlDbType.Date, command, pa.Documents[pa.Documents.Count - 1].Date);
+            DB.DBConnector.AddToCommand("@paid", NpgsqlTypes.NpgsqlDbType.Numeric, command, pa.Id);
+            DB.DBConnector.AddToCommand("@file", NpgsqlTypes.NpgsqlDbType.Varchar, command, pa.Documents[pa.Documents.Count - 1].FilePath);
+            DB.DBConnector.AddToCommand("@erforderlich", NpgsqlTypes.NpgsqlDbType.Boolean, command, pa.Documents[pa.Documents.Count - 1].Required);
+
+            try { command.ExecuteNonQuery(); } catch (Exception e) { MessageBox.Show(e.Message.ToString(), "Error"); }
+
+            con.Close();
+        }
+        /// <summary>
+        /// Die Attribute Filepath und erforderlich können mit dieser Methode upgedated werden, nicht aber 
+        /// andere Attribute
+        /// </summary>
+        /// <param name="pa"></param>
+        public void updateDocument(PersonalAssistant pa)
+        {
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+
+
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "UPDATE Dokumente SET File=@file,erforderlich=@erforderlich WHERE name=@name AND datum=@datum AND paid=@paid";
+
+            DB.DBConnector.AddToCommand("@name", NpgsqlTypes.NpgsqlDbType.Varchar, command, pa.Documents[pa.Documents.Count - 1].DocumentName);
+            DB.DBConnector.AddToCommand("@datum", NpgsqlTypes.NpgsqlDbType.Date, command, pa.Documents[pa.Documents.Count - 1].Date);
+            DB.DBConnector.AddToCommand("@paid", NpgsqlTypes.NpgsqlDbType.Numeric, command, pa.Id);
+            DB.DBConnector.AddToCommand("@file", NpgsqlTypes.NpgsqlDbType.Varchar, command, pa.Documents[pa.Documents.Count - 1].FilePath);
+            DB.DBConnector.AddToCommand("@erforderlich", NpgsqlTypes.NpgsqlDbType.Boolean, command, pa.Documents[pa.Documents.Count - 1].Required);
+
+            try { command.ExecuteNonQuery(); } catch (Exception e) { MessageBox.Show(e.Message.ToString(), "Error"); }
+
+            con.Close();
+        }
+        /// <summary>
+        /// Einfügen eines Dienstverhältnisses, kann nur über PADAO eingefügt werden, nicht über PurchaserDataDAO!
+        /// </summary>
+        /// <param name="pur"></param>
+        /// <param name="pa"></param>
+        public void insertEmploymentStatus(Purchaser pur, PersonalAssistant pa)
+        {
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+
+
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "INSERT INTO Dienstverhaeltnis VALUES (@agid,@paid)";
+
+            DB.DBConnector.AddToCommand("@paid", NpgsqlTypes.NpgsqlDbType.Numeric, command, pa.Id);
+            DB.DBConnector.AddToCommand("@agid", NpgsqlTypes.NpgsqlDbType.Numeric, command, pur.Id);
+
+            try { command.ExecuteNonQuery(); } catch (Exception e) { MessageBox.Show(e.Message.ToString(), "Error"); }
+
+            con.Close();
+        }
+
+        public void deleteEmploymentStatus(Purchaser pur, PersonalAssistant pa)
+        {
+
+            //eventuell alte Dienstverträge in einen dafür vorgesehenen Ordner verschieben
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+
+
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "DELETE FROM Dienstverhaeltnis WHERE agid=@agid AND paid=@paid";
+
+            DB.DBConnector.AddToCommand("@paid", NpgsqlTypes.NpgsqlDbType.Numeric, command, pa.Id);
+            DB.DBConnector.AddToCommand("@agid", NpgsqlTypes.NpgsqlDbType.Numeric, command, pur.Id);
+
+            try { command.ExecuteNonQuery(); } catch (Exception e) { MessageBox.Show(e.Message.ToString(), "Error"); }
+
+            con.Close();
+        }
+
+        /// <summary>
+        /// lädt alle purchaser in die Liste des Persönlichen Assistenen, die mit ihm ein Dienstverhältnis haben.
+        /// </summary>
+        /// <param name="pa"></param>
+        public void selectPurchaserList(PersonalAssistant pa)
+        {
+            NpgsqlConnection con = DB.DBConnector.GetConnection();
+
+
+
+            NpgsqlCommand command = new NpgsqlCommand(null, con);
+            command.CommandText = "SELECT * FROM Dienstverhaeltnis p WHERE p.paid=@id";
+
+            DB.DBConnector.AddToCommand("@id", NpgsqlTypes.NpgsqlDbType.Integer, command, pa.Id);
+
+            NpgsqlDataReader reader = command.ExecuteReader();
+            List<int> agIDs = new List<int>();
+            while (reader.Read())
+            {
+                if (!reader.IsDBNull(0))
+                {
+                    agIDs.Add(reader.GetInt32(0));
+                }
+            }
+            reader.Close();
+            con.Close();
+
+            PurchaserDAO purDAO = new PurchaserDAO();
+            foreach (int i in agIDs)
+            {
+                Purchaser pur = new Purchaser();
+                pur.Id = i;
+                pur = purDAO.Select(pur);
+                pa.Purchasers.Add(pur);
+            }
+
+
+        }
+
+        public System.Collections.Generic.List<PersonalAssistant> SelectSpecific(PersonalAssistant pa)
+        {
+            throw new NotImplementedException();
+        }
+
+
+
+    }
+}

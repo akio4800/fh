@@ -1,0 +1,281 @@
+﻿using SelvesSoftware.DB;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using SelvesSoftware.BusinessLogic;
+namespace SelvesSoftware.BusinessLogic
+{
+    //-----------------------------------------------------------------------------------------------------
+    public class MonthlyBillingBl : IMonthlyBillingBl
+    {
+        private IMonthlyBillingDAO _mbDao;
+        //-----------------------------------------------------------------------------------------------------
+        public IMonthlyBillingDAO MbDao
+        {
+            get
+            {
+                if (_mbDao == null)
+                {
+                    _mbDao = new MonthlyBillingDAO();
+                }
+                return _mbDao;
+            }
+            set
+            {
+                _mbDao = value;
+            }
+        }
+        //-----------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// die Monatsabrechnung für einen PA aus der DB holen
+        /// Thomas: hier müssen Jahr, Monat und AG auch angegeben werden ansonsten brauchen wir hier eine Liste.
+        /// </summary>
+        /// <param name="mb"></param>
+        /// <returns></returns>
+        public MonthlyBillingPerPa SelectMb(MonthlyBillingPerPa mb)
+        {
+            return MbDao.selectMBEntry(mb);
+        }
+        //-----------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Liste von Monatsabrechnungen für einen PA aus DB holen
+        /// </summary>
+        /// <returns></returns>
+        public List<MonthlyBillingPerPa> SelectMbPerPa()
+        {
+            List<MonthlyBillingPerPa> mbppa = new List<MonthlyBillingPerPa>();
+            mbppa = MbDao.SelectMBperPa(mbppa);
+            return mbppa;
+        }
+        //-----------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// alle Monatsabrechnungen aus der DB holen
+        /// </summary>
+        /// <returns></returns>
+        public List<MonthlyBilling> SelectAllMB()
+        {
+            List<MonthlyBilling> mbList = new List<MonthlyBilling>();
+            mbList = MbDao.selectAllMB();
+
+            foreach (MonthlyBilling mb in mbList)
+            {
+                CreateMb(mb);
+                calculateValues(mb);
+            }
+            return mbList;
+        }
+        //-----------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// alle Monatsabrechnungen für eine bestimmte Periode aus der DB holen
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <returns></returns>
+        public List<MonthlyBilling> SelectMbPeriod(DateTime from, DateTime to)
+        {
+            List<MonthlyBilling> mbList = new List<MonthlyBilling>();
+            mbList = MbDao.SelectPeriod(from, to);
+            //fehlerhandling??
+            return mbList;
+        }
+        //-----------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// holt alle Monatsabrechnungen eines bestimmten AG aus der DB
+        /// </summary>
+        /// <param name="pur"></param>
+        /// <returns></returns>
+        public List<MonthlyBilling> SelectAllMB(Purchaser pur)
+        {
+            return MbDao.selectSpecificMB(pur);
+        }
+        //-----------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// holt eine bestimmte Monatsabrechnung aus der DB (bestimmtes Monat für bestimmten AG)
+        /// </summary>
+        /// <param name="mb"></param>
+        /// <returns></returns>
+        public MonthlyBilling SelectSpecificMb(MonthlyBilling mb)
+        {
+            return null; //MbDao.SelectAllMB(mb);
+        }
+        //-----------------------------------------------------------------------------------------------------
+        public MonthlyBilling calculateValues(MonthlyBilling mb)
+        {
+            
+            mb.ConsumedHoursAmount = mb.SumHours * mb.Purchaser.HourlyRatePayoff;
+            if (mb.Purchaser.AssistenceDemand * (decimal)4.6 > (decimal)mb.Purchaser.CareAllowanceMaximum)
+            {
+                mb.ContributionCareAllowance = (decimal)mb.Purchaser.CareAllowanceMaximum;
+            }
+            else
+            {
+                mb.ContributionCareAllowance = mb.Purchaser.AssistenceDemand * (decimal)4.6;
+            }
+            mb.AmountActuallyPaid = mb.Purchaser.AssistenceDemand - mb.Purchaser.InputIncome - mb.ContributionCareAllowance;
+            mb.DifferenceToPreviousMonth = getDifferenceToPrevMonth(mb);
+            mb.TravelExpences = mb.SumKm * mb.Purchaser.TravellingAllowance;
+            mb.PayOut = mb.Purchaser.AssistenceDemand - mb.Purchaser.InputIncome - mb.ContributionCareAllowance - mb.DifferenceToPreviousMonth;
+            mb.PayOff = mb.SumHours - mb.Purchaser.InputIncome - mb.ContributionCareAllowance + mb.TravelExpences;
+
+            mb.Difference = mb.PayOut - mb.PayOff;
+
+            mb.HourContingent = mb.Purchaser.AssistenceDemand * 12;
+            mb.SoFarTookHours = getTookHours(mb);
+            mb.RemainingHours = mb.HourContingent + mb.SoFarTookHours;
+            mb.CurrentHourDeposit = getDemandHours(mb) - getTookHours(mb);
+            return mb;
+        }
+
+        //-----------------------------------------------------------------------------------------------------
+
+        private decimal getDemandHours(MonthlyBilling mb)
+        {
+            List<MonthlyBilling> mList = new List<MonthlyBilling>();
+            mList = MbDao.selectAllFrom(mb.Purchaser.Purchaser.ApprovalBegin);
+            decimal s = 0;
+            decimal sumHours = getTookHours(mb);
+            foreach (MonthlyBilling m in mList)
+            {
+                s += m.Purchaser.AssistenceDemand;
+            }
+            return s-sumHours;
+        }
+
+        //-----------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// holt alle bereits benötigten Stunden des Stundenkontingents im Bewilligungszeitraum
+        /// </summary>
+        /// <param name="mb"></param>
+        /// <returns></returns>
+        private decimal getTookHours(MonthlyBilling mb)
+        {
+            List<MonthlyBilling> mList = new List<MonthlyBilling>();
+            mList = MbDao.selectAllFrom(mb.Purchaser.Purchaser.ApprovalBegin);
+            decimal sum = 0;
+            foreach (MonthlyBilling m in mList)
+            {
+                sum += m.ConsumedHoursAmount;
+            }
+            return sum;
+        }
+
+        //-----------------------------------------------------------------------------------------------------
+       /// <summary>
+       /// holt die Differenz aus dem Vormonat
+       /// </summary>
+       /// <param name="mb"></param>
+       /// <returns></returns>
+        private decimal getDifferenceToPrevMonth(MonthlyBilling mb)
+        {
+            List<MonthlyBilling> mList = new List<MonthlyBilling>();
+            mList = MbDao.selectAllFrom(mb.Purchaser.Purchaser.ApprovalBegin);
+            foreach (MonthlyBilling m in mList)
+            {
+                if (m.Year == mb.Year && m.Month + 1 == mb.Month)
+                {
+                    return m.Difference;
+                }
+            }
+            return 0;
+        }
+        //-----------------------------------------------------------------------------------------------------
+        public bool CreateMb(MonthlyBilling m)
+        {
+           // m = MbDao.InsertMonthlyBilling(m);
+            foreach (MonthlyBillingPerPa mbp in m.Mb)
+            {
+                //ermittelt die KM und Stunden Summen
+                if (mbp.EffortList != null)
+                {
+                    foreach (EffortEntry ee in mbp.EffortList)
+                    {
+                        DateTime currentDate = new DateTime(ee.Year, ee.Month, ee.Day);
+                        if (IsNightShift(ee.A1))
+                        {
+                            m.SumHours += 4;
+                        }
+                        else if (IsHoliday(currentDate) || IsNight(ee.From, ee.To))
+                        {
+                            TimeSpan diff = ee.To.Subtract(ee.From);
+                            m.SumHours += (decimal)((diff.TotalHours * 1.5));
+                        }
+                        else
+                        {
+                            TimeSpan diff = ee.To.Subtract(ee.From);
+                            m.SumHours += (int)(diff.TotalHours);
+                        }
+                        m.SumKm += ee.Km;
+                    }
+                }
+            }
+            return true;
+        }
+        //-----------------------------------------------------------------------------------------------------
+        public bool IsNightShift(Activity activity)
+        {
+            return (activity.Name == Activity.State.Nachtbereitschaft);
+        }
+        //-----------------------------------------------------------------------------------------------------
+        public bool IsNight(DateTime dateTime1, DateTime dateTime2)
+        {
+            DateTime nightFrom = new DateTime(dateTime1.Year,dateTime1.Month,dateTime1.Day,22,00,00);
+            DateTime nightTo = new DateTime(dateTime2.Year, dateTime2.Month, dateTime2.Day, 06, 00, 00);
+            return (dateTime1.Hour >= nightFrom.Hour || dateTime2.Hour >= nightFrom.Hour);
+        }
+        //-----------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Überprüft ob es sich bei dem Tag um einen Sonntag oder Feiertag handelt
+        /// </summary>
+        /// <param name="currentDate"></param>
+        /// <returns></returns>
+        public bool IsHoliday(DateTime currentDate)
+        {
+            HolidayLogic austrianHolidays = HolidayLogic.GetInstance(currentDate.Year);
+            String d = currentDate.ToString("dddd");
+            bool isH = austrianHolidays.IsHoliday(currentDate);
+            return currentDate.ToString("dddd") == "Sonntag" || austrianHolidays.IsHoliday(currentDate);
+        }
+        //-----------------------------------------------------------------------------------------------------
+        public bool UpdateMb(MonthlyBilling mb)
+        {
+            if (MbDao.UpdateMonthlyBilling(mb))
+                return true;
+            return false;
+        }
+
+
+        public MonthlyBilling InsertMonthlyBilling(MonthlyBilling mb)
+        {
+            foreach (MonthlyBillingPerPa mbpa in mb.Mb)
+            {
+                mb.Mb.Add(InsertMonthlyBilling(mbpa));
+            }
+            return mb;
+        }
+
+        public MonthlyBillingPerPa InsertMonthlyBilling(MonthlyBillingPerPa mb)
+        {
+            return MbDao.InsertMonthlyBilling(mb);
+        }
+
+        public bool UpdateMonthlyBillingEntry(MonthlyBillingPerPa mb)
+        {
+            return MbDao.UpdateMonthlyBillingEntry(mb);
+        }
+
+        public List<MonthlyBillingPerPa> SelectMBperPa(List<MonthlyBillingPerPa> mbppa)
+        {
+           return MbDao.SelectMBperPa(mbppa);
+
+        }
+
+        public MonthlyBilling SelectAllMB(MonthlyBilling mb)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}
+
+

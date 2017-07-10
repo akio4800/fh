@@ -1,0 +1,17 @@
+﻿<Window x:Class="SelvesSoftware.SettingsLogin"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Background="White"
+    Title="Login" Height="150" Width="300">
+    <Grid HorizontalAlignment="Left" Height="120" Margin="0,0,0,0" VerticalAlignment="Top" Width="290">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="120*"/>
+        </Grid.RowDefinitions>
+        <TextBlock HorizontalAlignment="Left" Margin="19,11,0,0" TextWrapping="Wrap" Text="Benutzername:" VerticalAlignment="Top" Height="15.96" Width="78.79" />
+        <TextBlock HorizontalAlignment="Left" Margin="19,39,0,0" TextWrapping="Wrap" Text="Passwort:" VerticalAlignment="Top" Height="15.96" Width="49.557" />
+        <TextBox HorizontalAlignment="Left" Height="23" Margin="106,10,0,0" TextWrapping="Wrap" Text="admin" VerticalAlignment="Top" Width="170" Name="User" IsEnabled="False"/>
+        <PasswordBox HorizontalAlignment="Left" Margin="106,39,0,0" VerticalAlignment="Top" Width="170" Height="23" PasswordChar="*" Name="Password"/>
+        <Button Content="Einloggen" HorizontalAlignment="Left" Margin="40,75,0,0" VerticalAlignment="Top" Width="90" Height="23"/>
+        <Button Content="Zurücksetzen" HorizontalAlignment="Right" Margin="0,75,40,0" VerticalAlignment="Top" Width="90" Height="23"/>
+    </Grid>
+</Window>

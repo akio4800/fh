@@ -1,0 +1,56 @@
+﻿using SelvesSoftware.DataContainer;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SelvesSoftware
+{
+    /// <summary>
+    /// author:ZK
+    /// Ein Eintrag (Tupel) in der Monatsabrechnungtabelle
+    /// </summary>
+    public class MonthlyBillingPerPa
+    {
+        public int Month { get; set; }
+        public int Year { get; set; }
+        public PersonalAssistant Pa { get; set; }
+        public PurchaserData Pur { get; set; }
+        /// <summary>
+        /// Leistungsaufzeichnungen für einen PA im Monat
+        /// </summary>
+        public List<EffortEntry> EffortList { get; set; }
+
+        /// <summary>
+        /// Anzahl Privatkilometer
+        /// </summary>
+        public int PrivateKm { get; set; }
+
+
+        /// <summary>
+        /// Abrechenbare Kilometer
+        /// </summary>
+        public int BillableKm { get; set; }
+
+        /// <summary>
+        /// Anzahl Arbeitsstunden
+        /// </summary>
+        public int WorkingHours { get; set;}
+
+        public DateTime? RehaFrom { get; set; }
+        public DateTime? RehaTo { get; set; }
+
+        public MonthlyBillingPerPa(int month, int year,PersonalAssistant pa, PurchaserData p, List<EffortEntry> effortEntries)
+        {
+            this.Month = month;
+            this.Year = year;
+            this.Pa = pa;
+            this.Pur = p;
+            this.EffortList = effortEntries;
+        }
+        public MonthlyBillingPerPa() { }
+
+
+    }
+}
